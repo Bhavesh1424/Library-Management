@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: library-exchange
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Business Domain Policies (Configurable per Section 2 & 4)
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration-ms: 86400000 # 24 hours
+  hold:
+    expiry-hours: 48 # Auto-cancellation window for READY_PICKUP
+  loan:
+    duration-days: 14
+    daily-fine-rate: 5.00 # INR 5.00 per overdue day
+
+# Springdoc OpenAPI Swagger configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method

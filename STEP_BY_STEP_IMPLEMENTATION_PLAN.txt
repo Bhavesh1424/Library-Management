@@ -1,0 +1,291 @@
+================================================================================
+  CENTRALIZED LIBRARY INTER-BRANCH BOOK EXCHANGE SYSTEM
+  FULL-STACK ENTERPRISE JAVA (SPRING BOOT 3.2.x + JAVA 17)
+  STEP-BY-STEP IMPLEMENTATION ROADMAP & SECTION BREAKDOWN
+================================================================================
+
+DOCUMENT VERSION: 1.0.0
+COMPLIANCE: Production PRD (Java 17, Spring Boot, JPA, RBAC, Pessimistic Locking)
+TARGET DIRECTORY: c:\Users\Bhavesh\OneDrive\Desktop\JAVA MICRO\
+
+--------------------------------------------------------------------------------
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. ARCHITECTURE OVERVIEW & TECH STACK
+2. SECTION 0: PROJECT BOOTSTRAP & INFRASTRUCTURE SETUP
+3. SECTION 1: DOMAIN DATA MODEL, AUDIT & PERSISTENCE ENGINE (Milestone 1)
+4. SECTION 2: SECURITY, AUTHENTICATION & RBAC ENGINE (Milestone 1-2)
+5. SECTION 3: CATALOG SEARCH ENGINE & INVENTORY MATRIX (Milestone 2)
+6. SECTION 4: TRANSFER STATE MACHINE & CONCURRENCY CONTROLS (Milestone 3)
+7. SECTION 5: CIRCULATION, AUDIT LOGGING & SCHEDULED DAEMONS (Milestone 3)
+8. SECTION 6: FRONTEND UI & INTERACTIVE DASHBOARDS (Milestone 4)
+9. SECTION 7: TESTING SUITE, BENCHMARKING & DEPLOYMENT VERIFICATION (Milestone 4)
+
+================================================================================
+1. ARCHITECTURE OVERVIEW & TECH STACK
+================================================================================
+- Runtime: Java 17 LTS
+- Framework: Spring Boot 3.2.x
+- Data Access: Spring Data JPA, Hibernate 6
+- Database: PostgreSQL 15 / MySQL 8.0 (with H2 in-memory profile for fast testing)
+- Security: Spring Security 6, JWT, BCrypt (cost factor 12)
+- Locking: Pessimistic Write Locking (@Lock(LockModeType.PESSIMISTIC_WRITE))
+- Scheduler: Spring @Scheduled (Cron: 0 0 0 * * ? for midnight fines)
+- API Docs: SpringDoc OpenAPI / Swagger UI (v2)
+- Frontend: Responsive Web UI (Patron Catalog & Librarian Desk)
+
+================================================================================
+2. SECTION 0: PROJECT BOOTSTRAP & INFRASTRUCTURE SETUP
+================================================================================
+Goal: Set up the Maven build configuration, project folder layout, and environment configs.
+
+[x] Step 0.1: Initialize Maven pom.xml
+    - Dependencies:
+      * spring-boot-starter-web
+      * spring-boot-starter-data-jpa
+      * spring-boot-starter-security
+      * spring-boot-starter-validation
+      * postgresql / mysql-connector-j
+      * h2 (runtime test/dev)
+      * jjwt-api, jjwt-impl, jjwt-jackson (JWT tokens)
+      * springdoc-openapi-starter-webmvc-ui
+      * spring-boot-starter-test
+
+[x] Step 0.2: Configure Multi-Profile Application Configuration
+    - src/main/resources/application.yml (Base properties, JPA settings, Server port)
+    - src/main/resources/application-dev.yml (H2 in-memory DB, console enabled)
+    - src/main/resources/application-prod.yml (PostgreSQL/MySQL connection pool)
+
+[x] Step 0.3: Establish Clean Multi-Tier Package Structure
+    - Portable Maven wrapper (mvnw.cmd, mvnw.ps1) with JDK auto-healing
+    - src/main/java/com/campus/library/LibraryExchangeApplication.java
+    - Package blueprint: config, domain, repository, service, scheduler, controller, dto, security, exception
+
+================================================================================
+3. SECTION 1: DOMAIN DATA MODEL, AUDIT & PERSISTENCE ENGINE (Milestone 1)
+================================================================================
+Goal: Implement the relational entities, composite indices, and locking repository queries.
+
+[x] Step 1.1: Create Enumerations
+    - CopyStatus: AVAILABLE, RESERVED, IN_TRANSIT, READY_PICKUP, ISSUED
+    - TransferStatus: REQUESTED, DISPATCHED, READY_FOR_PICKUP, COMPLETED, CANCELLED, EXPIRED
+    - UserRole: ROLE_STUDENT, ROLE_LIBRARIAN, ROLE_ADMIN
+
+[x] Step 1.2: Build JPA Entities
+    - Book: id, isbn (13 digits unique), title, author, edition
+    - Branch: id, code (unique, e.g., 'CS-DEPT', 'CENTRAL'), name, contact_email
+    - BranchCopy: id, book (FK), branch (FK), barcode (unique), status (CopyStatus), version (optimistic locking)
+    - User: id, university_id, full_name, email, password_hash, role
+    - TransferRequest: id, copy (FK), student (FK), from_branch (FK), to_branch (FK), status, created_at, expires_at
+    - Loan: id, copy (FK), student (FK), issue_date, due_date, return_date, fine_amount
+    - AuditLog: id, entity_name, entity_id, from_status, to_status, operator_id, recorded_at
+
+[x] Step 1.3: Define Database Indexes (NFR-2 Performance benchmark < 350ms)
+    - Composite Index on books (title, author)
+    - Composite Index on branch_copies (branch_id, status)
+    - Unique index on branch_copies (barcode)
+    - Index on transfer_requests (copy_id, status)
+
+[x] Step 1.4: Repository Layer & Pessimistic Lock Query
+    - BranchCopyRepository:
+      * findByIdForUpdate(@Param("id") Long id) with @Lock(LockModeType.PESSIMISTIC_WRITE)
+      * countByBookIdAndCurrentBranchIdAndStatus(bookId, branchId, status)
+    - BookRepository with JpaSpecificationExecutor for multi-field search
+    - BranchRepository, UserRepository, TransferRequestRepository, LoanRepository, AuditLogRepository
+
+[x] Step 1.5: Seed Data / Demo Fixtures
+    - DataInitializer (CommandLineRunner):
+      * 3 Branches: Central Library ('CENTRAL'), Computer Science ('CS-DEPT'), Mechanical ('MECH-DEPT')
+      * 5 Master Books with distributed copies (0 in Central, 2 in CS for CLRS)
+      * 4 Seed Users with BCrypt hash (Student, CS Librarian, Central Librarian, Admin)
+      * Verified via automated BranchCopyRepositoryTest integration test suite
+
+================================================================================
+4. SECTION 2: SECURITY, AUTHENTICATION & RBAC ENGINE (Milestone 1-2)
+================================================================================
+Goal: Implement Spring Security with JWT tokens, password hashing, and role guards.
+
+[x] Step 2.1: Password Hashing (NFR-3)
+    - Configured BCryptPasswordEncoder with strength parameter 12 in SecurityConfig.
+
+[x] Step 2.2: JWT Infrastructure
+    - JwtTokenProvider: JJWT 0.12.x HMAC-SHA signing, claims extraction, token validation.
+    - JwtAuthenticationFilter: intercepts Bearer tokens in Authorization header.
+    - CustomUserDetailsService & CustomUserDetails supporting login by email or university ID.
+    - JwtAuthenticationEntryPoint returning structured JSON on 401 Unauthorized.
+
+[x] Step 2.3: SecurityFilterChain Configuration
+    - Public paths:
+      * GET /api/v1/books/** (Catalog search & branch availability)
+      * POST /api/v1/auth/login, POST /api/v1/auth/register
+      * /swagger-ui/**, /v3/api-docs/**
+      * /h2-console/** (with frameOptions sameOrigin)
+    - Protected paths:
+      * POST /api/v1/transfers/request -> hasAuthority('ROLE_STUDENT')
+      * PUT /api/v1/transfers/*/dispatch -> hasAuthority('ROLE_LIBRARIAN')
+      * PUT /api/v1/transfers/*/receive -> hasAuthority('ROLE_LIBRARIAN')
+      * POST /api/v1/loans/checkout -> hasAuthority('ROLE_LIBRARIAN')
+      * /api/v1/admin/** -> hasAuthority('ROLE_ADMIN')
+
+[x] Step 2.4: Auth Controller & DTOs
+    - AuthController: /api/v1/auth/login, /api/v1/auth/register, /api/v1/auth/me
+    - DTOs with Jakarta Bean Validation: LoginRequest, LoginResponse, RegisterRequest
+    - GlobalExceptionHandler with clean status code mapping (400, 401, 403, 404, 409)
+    - Verified via AuthControllerTest (5 passing MockMvc integration tests)
+
+================================================================================
+5. SECTION 3: CATALOG SEARCH ENGINE & INVENTORY MATRIX (Milestone 2)
+================================================================================
+Goal: Build public search and real-time branch availability matrix endpoints.
+
+[x] Step 3.1: Catalog Specification & Search Service (FR-1.1)
+    - Implemented CatalogService.searchCatalog: case-insensitive query on title, author, or ISBN.
+    - GET /api/v1/books?query={q}&page={page}&size={size}&sortBy={sortBy}&direction={dir} (Paginated Pageable).
+
+[x] Step 3.2: Real-time Stock Matrix Service (FR-1.2)
+    - GET /api/v1/books/{id}/inventory
+    - Returns JSON response showing breakdown of copies per branch:
+      {
+        "bookId": 1,
+        "title": "Introduction to Algorithms",
+        "totalCopies": 2,
+        "totalAvailable": 2,
+        "branchBreakdown": [
+          { "branchCode": "CENTRAL", "available": 0, "reserved": 0, "inTransit": 0 },
+          { "branchCode": "CS-DEPT", "available": 2, "reserved": 0, "inTransit": 0 },
+          { "branchCode": "MECH-DEPT", "available": 0, "reserved": 0, "inTransit": 0 }
+        ],
+        "availableCopies": [ ... ]
+      }
+
+[x] Step 3.3: Branch Master API (FR-1.3)
+    - GET /api/v1/branches (public list of campus libraries)
+    - POST /api/v1/branches (ROLE_ADMIN registration)
+    - GET /api/v1/books/{id} (master bibliographic info)
+    - POST /api/v1/books (ROLE_ADMIN book definition)
+
+[x] Step 3.4: Global Exception Handling & DTO Validation (NFR-3)
+    - GlobalExceptionHandler (@RestControllerAdvice) with validation errors, 400, 401, 403, 404, 409
+    - Verified via BookCatalogControllerTest (4 passing MockMvc integration tests)
+
+================================================================================
+6. SECTION 4: TRANSFER STATE MACHINE & CONCURRENCY CONTROLS (Milestone 3)
+================================================================================
+Goal: Implement the core intra-campus transfer workflow with pessimistic row locking.
+
+[x] Step 4.1: Transfer Request Service with Pessimistic Locking (NFR-1)
+    - Method: requestTransfer(Long copyId, Long destinationBranchId, Long studentId)
+    - Transaction: @Transactional(isolation = Isolation.READ_COMMITTED)
+    - Acquires write lock on BranchCopy via findByIdForUpdate(copyId) (SELECT ... FOR UPDATE).
+    - Validation: Throws ConflictException (HTTP 409) if not AVAILABLE.
+    - Transitions copy to RESERVED and creates TransferRequest (REQUESTED).
+    - Appends immutable entries to AuditLog table.
+
+[x] Step 4.2: Dispatch Endpoint (ROLE_LIBRARIAN)
+    - PUT /api/v1/transfers/{id}/dispatch
+    - Source librarian marks item shipped to transit team.
+    - Transitions copy to IN_TRANSIT and transfer to DISPATCHED.
+    - Appends immutable audit entry.
+
+[x] Step 4.3: Receive Endpoint (ROLE_LIBRARIAN)
+    - PUT /api/v1/transfers/{id}/receive
+    - Destination branch acknowledges arrival.
+    - Transitions copy to READY_PICKUP and re-assigns physical current_branch.
+    - Sets expires_at = now + 48 hours for student pickup window.
+    - Appends immutable audit entry.
+
+[x] Operational Endpoints & Concurrency Verification
+    - GET /api/v1/transfers/my-requests (Student tracking)
+    - GET /api/v1/transfers/queue (Librarian workflow dashboard)
+    - Verified via TransferStateFlowTest (Full linear state machine test)
+    - Verified via TransferConcurrencyTest (10 concurrent threads: 1 Success, 9 HTTP 409 Conflicts)
+
+================================================================================
+7. SECTION 5: CIRCULATION, AUDIT LOGGING & SCHEDULED DAEMONS (Milestone 3)
+================================================================================
+Goal: Implement checkout, returns, audit persistence, and automated background jobs.
+
+[x] Step 5.1: Physical Barcode Checkout (ROLE_LIBRARIAN)
+    - POST /api/v1/loans/checkout
+    - Body: { "barcode": "BC-10924", "studentId": 42 }
+    - Validates copy status (READY_PICKUP for the student or AVAILABLE).
+    - Transitions copy to ISSUED, creates 14-day Loan record, completes any associated transfer.
+    - Appends immutable audit entry to audit_logs.
+
+[x] Step 5.2: Book Return Endpoint (ROLE_LIBRARIAN)
+    - POST /api/v1/loans/{id}/return
+    - Marks return_date = today, restores copy to AVAILABLE at return branch.
+    - Calculates final fine if overdue.
+    - Appends immutable audit entry.
+
+[x] Step 5.3: Automated Hold Expiry Daemon (Section 4.1)
+    - HoldExpiryScheduler: runs every minute to inspect 48-hour pickup window.
+    - Finds all TransferRequests with status == READY_FOR_PICKUP and expires_at < now.
+    - Reverts copy.status = AVAILABLE, marks transfer.status = EXPIRED, logs audit trail.
+
+[x] Step 5.4: Midnight Overdue Fine Calculation Daemon (Section 4.1)
+    - OverdueFineScheduler: scheduled at midnight (cron = "0 0 0 * * ?").
+    - Formula: Fine Amount = Days Elapsed Past Due * ₹5.00 per non-returned book.
+    - Automatically updates active overdue loans in database.
+
+[x] Step 5.5: Audit Trail Service & Query APIs (NFR-4)
+    - AdminAuditController: GET /api/v1/admin/audit-logs, GET /api/v1/admin/audit-logs/entity/{entityName}/{entityId}.
+    - GET /api/v1/loans/my-loans (Student loan and fine inspection).
+    - GET /api/v1/loans/active (Librarian overview of active circulation).
+    - Verified via CirculationAndSchedulerTest (3 passing integration tests)
+
+================================================================================
+8. SECTION 6: FRONTEND UI & INTERACTIVE DASHBOARDS (Milestone 4)
+================================================================================
+Goal: Build a modern, reactive interface with distinct roles (Student vs Librarian Desk).
+
+[x] Step 6.1: Patron / Student Experience
+    - Search bar with instant debounced catalog search.
+    - Book Detail Card with real-time Branch Availability Badges (e.g. CENTRAL: 0, CS-DEPT: 2).
+    - "Request Transfer" action modal: selects target pickup branch with pessimistic locking protection.
+    - "My Requests & Loans" view: live Amazon/Swiggy-style horizontal tracking bar (Requested -> In Transit -> Ready at Desk -> Collected), due dates, and fines.
+
+[x] Step 6.2: Branch Librarian Operations Desk
+    - Tab 1: Dispatch Queue (Pulls requested books from CS shelf, 1-click Dispatch to transit).
+    - Tab 2: Receiving Intake (Scans/Clicks incoming transit parcels to mark Ready with 48h hold timer).
+    - Tab 3: Barcode Checkout Terminal (Barcode scan + Student ID to issue book).
+    - Tab 4: Returns Terminal (Scan return barcode, display fines if overdue).
+
+[x] Step 6.3: Chief Administrator Console
+    - Live campus inventory distribution chart & metrics.
+    - Immutable audit trail viewer (NFR-4) displaying full lifecycle chain of custody.
+    - Verified via FrontendIntegrationTest (3 passing MockMvc integration tests)
+
+================================================================================
+9. SECTION 7: TESTING SUITE, BENCHMARKING & DEPLOYMENT VERIFICATION (Milestone 4)
+================================================================================
+Goal: Guarantee ACID concurrency compliance, performance benchmarks, and test coverage.
+
+[x] Step 7.1: Unit & Service Layer Tests
+    - TransferStateFlowTest: Complete linear transfer lifecycle (REQUESTED -> DISPATCHED -> READY_FOR_PICKUP) and audit records.
+    - CirculationAndSchedulerTest: Validated checkout, return, 48-hour hold auto-cancellation, and ₹5/day overdue fine calculations.
+
+[x] Step 7.2: High-Concurrency Multithreading Test (NFR-1)
+    - TransferConcurrencyTest: 10 concurrent threads simultaneously contending for 1 single copy.
+    - Verified: Exactly 1 thread succeeds (201 Created), remaining 9 receive HTTP 409 Conflict. Zero duplicate bookings.
+
+[x] Step 7.3: REST API Integration Tests (MockMvc)
+    - AuthControllerTest: Login, registration, token validation, 401 unauthorized handling.
+    - BookCatalogControllerTest: Multi-field search (title, author, ISBN), real-time branch availability matrix.
+    - RbacSecurityRulesTest: Strict role guards (Students blocked from dispatch & checkout; Librarians blocked from placing student holds).
+    - FrontendIntegrationTest: Static resource serving (index.html, style.css, app.js).
+
+[x] Step 7.4: Swagger / OpenAPI Documentation
+    - /v3/api-docs & /swagger-ui.html verified with Bearer JWT authorization configuration.
+    - Entire Test Suite Result: 24 Tests Run, 0 Failures, 0 Errors, BUILD SUCCESS.
+
+================================================================================
+EXECUTION SEQUENCE PLAN
+================================================================================
+Phase 1 -> Execute Section 0 + Section 1 (Project skeleton, Entities, DB setup, Seed data)
+Phase 2 -> Execute Section 2 (Security, JWT, User Roles, Auth APIs)
+Phase 3 -> Execute Section 3 (Catalog Search, Inventory Matrix API)
+Phase 4 -> Execute Section 4 + Section 5 (Transfer State Engine, Locking, Loans, Schedulers)
+Phase 5 -> Execute Section 6 (Full-Stack UI Dashboards)
+Phase 6 -> Execute Section 7 (Concurrency Tests, Validation & Verification)
+================================================================================

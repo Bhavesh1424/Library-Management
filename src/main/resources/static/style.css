@@ -1,0 +1,414 @@
+/* ==========================================================================
+   Athenaeum Quietude - Calming Editorial Design System for CampusLib
+   Pairs Literata serif with Plus Jakarta Sans geometric sans-serif
+   ========================================================================== */
+
+:root {
+    --font-headline: 'Literata', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    
+    --color-surface: #fbf9f5;
+    --color-forest: #4d594e;
+    --color-forest-container: #657166;
+    --color-sage: #DAEBE3;
+    --color-sky: #99CDD8;
+    --color-cream: #FDE8D3;
+    --color-blush: #F3C3B2;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: #1a1612;
+    background-image: linear-gradient(rgba(20, 16, 12, 0.45), rgba(20, 16, 12, 0.45)), url('/background.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+/* ================= Tab Buttons ================= */
+.tab-btn {
+    color: #434843;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-btn:hover {
+    color: #1b1c1a;
+    background-color: rgba(218, 235, 227, 0.4);
+}
+
+.tab-btn.active {
+    color: #ffffff;
+    background-color: #657166;
+    box-shadow: 0 2px 8px -2px rgba(101, 113, 102, 0.25);
+}
+
+.sub-tab-btn {
+    color: #434843;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sub-tab-btn:hover {
+    color: #1b1c1a;
+    background-color: rgba(218, 235, 227, 0.4);
+}
+
+.sub-tab-btn.active {
+    color: #ffffff;
+    background-color: #4d594e;
+    box-shadow: 0 2px 8px -2px rgba(77, 89, 78, 0.25);
+}
+
+/* Persona Chips */
+.chip {
+    color: #434843;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+}
+
+.chip:hover {
+    background-color: #eae8e4;
+    color: #1b1c1a;
+}
+
+.chip.active {
+    background-color: #DAEBE3;
+    color: #2D352E;
+    border-color: #CFD6C4;
+    font-weight: 600;
+}
+
+/* ================= Tab Views Visibility ================= */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.subtab-content {
+    display: none;
+    animation: fadeIn 0.25s ease forwards;
+}
+
+.subtab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= Modal Backdrop & Card ================= */
+.modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-backdrop.open .modal-card {
+    transform: scale(1);
+}
+
+/* ================= Swiggy/Amazon-Style Progress Stepper ================= */
+.progress-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    padding: 1rem 0;
+    margin: 1.5rem 0 1rem;
+}
+
+.progress-stepper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 24px;
+    right: 24px;
+    height: 3px;
+    background-color: #e4e2de;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.step-node {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+}
+
+.step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    background-color: #fbf9f5;
+    border: 2px solid #c4c8c1;
+    color: #747873;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.step-label {
+    font-size: 0.75rem;
+    color: #747873;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.step-node.completed .step-dot {
+    background-color: #4d594e;
+    border-color: #4d594e;
+    color: #ffffff;
+}
+
+.step-node.completed .step-label {
+    color: #4d594e;
+    font-weight: 600;
+}
+
+.step-node.active .step-dot {
+    background-color: #99CDD8;
+    border-color: #31666f;
+    color: #001f25;
+    box-shadow: 0 0 0 4px rgba(153, 205, 216, 0.35);
+    animation: pulseGlow 2s infinite ease-in-out;
+}
+
+.step-node.active .step-label {
+    color: #31666f;
+    font-weight: 700;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(153, 205, 216, 0.4); }
+    50% { box-shadow: 0 0 0 7px rgba(153, 205, 216, 0.15); }
+}
+
+/* ================= Tables ================= */
+.op-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.8125rem;
+    background-color: #ffffff;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    border: 1px solid rgba(196, 200, 193, 0.35);
+    box-shadow: 0 2px 12px -2px rgba(101, 113, 102, 0.04);
+}
+
+.op-table th {
+    background-color: #f5f3ef;
+    padding: 0.875rem 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    color: #434843;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid rgba(196, 200, 193, 0.35);
+}
+
+.op-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(196, 200, 193, 0.2);
+    color: #1b1c1a;
+    vertical-align: middle;
+}
+
+.op-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.op-table tbody tr:hover td {
+    background-color: #faf9f7;
+}
+
+/* ================= Notification Toasts ================= */
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    background-color: #ffffff;
+    color: #1b1c1a;
+    box-shadow: 0 8px 30px -4px rgba(101, 113, 102, 0.18);
+    border: 1px solid rgba(196, 200, 193, 0.5);
+    pointer-events: auto;
+    animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast.success {
+    border-left: 4px solid #1b6d47;
+}
+
+.toast.error {
+    border-left: 4px solid #ba1a1a;
+}
+
+.toast.info {
+    border-left: 4px solid #31666f;
+}
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Crisp Pixel Art Rendering for Hero Canvas */
+#hero-frame-canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+.font-pixel {
+    font-family: 'Pixelify Sans', cursive;
+}
+
+/* Branch Filter Pills */
+.branch-pill {
+    color: #434843;
+    transition: all 0.15s ease;
+}
+
+.branch-pill:hover {
+    color: #1b1c1a;
+    background-color: rgba(218, 235, 227, 0.4);
+}
+
+.branch-pill.active {
+    background-color: #657166;
+    color: #ffffff;
+    box-shadow: 0 1px 4px rgba(101, 113, 102, 0.25);
+}
+
+/* Auth Modal Tabs */
+.auth-pill {
+    color: #434843;
+    transition: all 0.2s ease;
+}
+
+.auth-pill:hover {
+    color: #1b1c1a;
+    background-color: rgba(218, 235, 227, 0.4);
+}
+
+.auth-pill.active {
+    color: #ffffff;
+    background-color: #4d594e;
+    box-shadow: 0 2px 8px -2px rgba(77, 89, 78, 0.25);
+}
+
+/* ================= Open Tome Book Spreads (Livro Base) ================= */
+.open-book-spread {
+    background: url('/livro-base.jpg') center center / 100% 100% no-repeat;
+    border-radius: 1.25rem;
+    box-shadow: 
+        0 24px 50px -10px rgba(0, 0, 0, 0.8),
+        0 8px 24px rgba(0, 0, 0, 0.6),
+        inset 0 0 40px rgba(45, 30, 15, 0.35);
+    border: 3px solid #2b1c11;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.open-book-spread:hover {
+    box-shadow: 
+        0 30px 60px -10px rgba(0, 0, 0, 0.85),
+        0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+/* Central spine binding shadow for physical depth */
+.open-book-spread::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 49.3%;
+    width: 1.4%;
+    background: linear-gradient(to right, rgba(0,0,0,0.30), rgba(0,0,0,0.06) 40%, transparent);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Left page interior padding to align naturally on the left parchment */
+.book-page-left {
+    padding: 1.25rem 2rem 1.25rem 1.5rem;
+}
+
+/* Right page interior padding to align naturally on the right parchment */
+.book-page-right {
+    padding: 1.25rem 1.5rem 1.25rem 2rem;
+}
+
+/* ================= Sticky Top Navigation Bar (Parchment Texture) ================= */
+.parchment-header {
+    background: url('/parchment-bg.jpg') center center / cover repeat;
+    position: relative;
+}
+
+.parchment-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 -4px 12px rgba(45, 28, 14, 0.25), inset 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+.parchment-header nav {
+    background: rgba(45, 30, 15, 0.08);
+    border: 1px solid rgba(90, 60, 35, 0.35);
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.parchment-header .tab-btn {
+    color: #3b2a1a;
+    font-weight: 500;
+}
+
+.parchment-header .tab-btn:hover {
+    color: #1a1008;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.parchment-header .tab-btn.active {
+    color: #ffffff;
+    background-color: #3d4a3e;
+    box-shadow: 0 2px 8px -2px rgba(45, 60, 48, 0.5);
+}
+
+/* ================= Search & Filter Card (Parchment Texture) ================= */
+.parchment-search-card {
+    background: url('/parchment-bg.jpg') center center / cover repeat;
+    position: relative;
+}
+
+.parchment-search-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 50px rgba(50, 30, 15, 0.3);
+    border-radius: inherit;
+}
+

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Athenaeum CampusLib Exchange — Inter-Branch Book Delivery Engine</title>
+
+    <!-- Google Fonts: Literata (Headlines) & Plus Jakarta Sans (Body & UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+    <!-- Google Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <!-- Tailwind CSS with Athenaeum Quietude Design System -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4d594e",
+                        "primary-container": "#657166",
+                        "on-primary-container": "#e8f5e7",
+                        "primary-fixed": "#d9e6d8",
+                        "secondary": "#31666f",
+                        "secondary-container": "#b4e8f4",
+                        "secondary-fixed": "#99CDD8",
+                        "on-secondary-fixed": "#001f25",
+                        "tertiary": "#704d40",
+                        "tertiary-container": "#8b6557",
+                        "tertiary-fixed": "#F3C3B2",
+                        "background": "#fbf9f5",
+                        "surface": "#fbf9f5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f5f3ef",
+                        "surface-container": "#efeeea",
+                        "surface-container-high": "#eae8e4",
+                        "surface-container-highest": "#e4e2de",
+                        "on-surface": "#1b1c1a",
+                        "on-surface-variant": "#434843",
+                        "outline": "#747873",
+                        "outline-variant": "#c4c8c1",
+                        "sage-mist": "#CFD6C4",
+                        "powder-sage": "#DAEBE3",
+                        "cream-vellum": "#FDE8D3",
+                        "error": "#ba1a1a",
+                        "success": "#1b6d47"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "2xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Literata", "serif"],
+                        body: ["Plus Jakarta Sans", "sans-serif"],
+                        pixel: ["'Pixelify Sans'", "cursive"]
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Custom Athenaeum Styles & Component Refinements -->
+    <link rel="stylesheet" href="/style.css"/>
+</head>
+<body class="text-on-surface antialiased min-h-screen flex flex-col font-body selection:bg-powder-sage selection:text-on-surface">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- ================= STICKY TOP NAVIGATION BAR (Parchment Texture) ================= -->
+    <header class="sticky top-0 z-40 parchment-header border-b-2 border-[#5a412b] shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+        <div class="max-w-[1360px] mx-auto px-4 sm:px-8 flex items-center justify-between h-20 w-full gap-4 relative z-10">
+            
+            <!-- Brand & Archival Crest -->
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="w-10 h-10 rounded-full bg-[#2e3b2f] flex items-center justify-center text-[#dce6dc] shadow-md border border-[#5a412b]/40">
+                    <span class="material-symbols-outlined text-xl" data-icon="local_library">local_library</span>
+                </div>
+                <div>
+                    <a href="#" class="text-xl font-headline font-semibold tracking-tight text-[#1b1c1a] hover:text-[#2e3b2f] transition-colors flex items-center gap-1.5">
+                        CampusLib <span class="text-[#2e3b2f] font-normal">Exchange</span>
+                    </a>
+                    <span class="text-[11px] text-[#5c432d] font-medium tracking-wider uppercase hidden sm:block">Inter-Branch Book Delivery Engine</span>
+                </div>
+            </div>
+
+            <!-- Main Navigation Tabs (Spacious Pill Ribbon) -->
+            <nav class="hidden md:flex items-center gap-1 p-1.5 rounded-full">
+                <button id="tab-btn-catalog" onclick="showTab('catalog')" class="tab-btn active px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base" data-icon="search">search</span>
+                    <span>Stacks &amp; Catalog</span>
+                </button>
+                <button id="tab-btn-tracker" onclick="showTab('tracker')" class="tab-btn px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 relative">
+                    <span class="material-symbols-outlined text-base" data-icon="local_shipping">local_shipping</span>
+                    <span>Courier Tracker</span>
+                    <span id="active-transfers-count" class="ml-1 px-2 py-0.2 rounded-full bg-[#4a3520] text-white text-xs font-bold">0</span>
+                </button>
+                <button id="tab-btn-librarian" onclick="showTab('librarian')" class="tab-btn px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base" data-icon="desk">desk</span>
+                    <span>Librarian Desk</span>
+                </button>
+                <button id="tab-btn-admin" onclick="showTab('admin')" class="tab-btn px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base" data-icon="verified_user">verified_user</span>
+                    <span>Audit &amp; Fleet</span>
+                </button>
+            </nav>
+
+            <!-- Right Side: Student Pill Badge & Profile Name Side-by-Side + Sign Out -->
+            <div class="flex items-center gap-3">
+                <!-- Active Role Pill Badge (e.g. Student) -->
+                <div id="top-user-role-pill" class="px-3.5 py-1.5 rounded-full bg-[#dce6dc] text-[#243d26] text-xs font-semibold flex items-center gap-1.5 border border-[#a8baa9] shadow-sm">
+                    <span id="top-user-role-icon">🎓</span>
+                    <span id="top-user-role-text">Student</span>
+                </div>
+
+                <!-- Profile Avatar & User Name Side-by-Side -->
+                <div class="flex items-center gap-2.5 pl-2 border-l border-[#7d5f3f]/40 text-xs">
+                    <div class="w-8 h-8 rounded-full bg-[#3d4a3e] flex items-center justify-center text-white font-bold text-xs shadow-inner">
+                        <span id="user-avatar-initial">A</span>
+                    </div>
+                    <div>
+                        <div id="current-user-name" class="font-semibold text-[#1b1c1a] leading-tight text-xs sm:text-sm">Aarav Sharma</div>
+                        <div id="current-role-badge" class="text-[10px] text-[#5c432d] font-semibold tracking-tight">ROLE_STUDENT</div>
+                    </div>
+                </div>
+
+                <!-- Switch Account Button -->
+                <button onclick="openAuthModal()" title="Switch Account or Register New ID" class="px-3 py-1.5 rounded-full bg-white/60 hover:bg-white/90 text-xs text-[#2b1c11] hover:text-black transition-colors flex items-center gap-1 border border-[#7d5f3f]/40 ml-1 shadow-sm font-medium">
+                    <span class="material-symbols-outlined text-sm" data-icon="switch_account">switch_account</span>
+                    <span class="hidden lg:inline">Switch / Sign In</span>
+                </button>
+
+                <!-- Sign Out Button -->
+                <button onclick="logoutUser()" title="Sign Out of CampusLib" class="px-2.5 py-1.5 rounded-full bg-white/60 hover:bg-red-50 text-xs text-[#6e4627] hover:text-red-700 transition-colors flex items-center gap-1 border border-[#7d5f3f]/40 shadow-sm font-medium">
+                    <span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+                    <span class="hidden xl:inline">Sign Out</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Mobile Navigation Ribbon -->
+        <div class="flex md:hidden items-center justify-around bg-surface-container-low border-t border-outline-variant/20 px-2 py-1.5 text-xs">
+            <button onclick="showTab('catalog')" class="py-1 px-3 rounded-full hover:bg-surface-container text-primary font-medium">Catalog</button>
+            <button onclick="showTab('tracker')" class="py-1 px-3 rounded-full hover:bg-surface-container text-on-surface-variant font-medium">Tracker</button>
+            <button onclick="showTab('librarian')" class="py-1 px-3 rounded-full hover:bg-surface-container text-on-surface-variant font-medium">Librarian</button>
+            <button onclick="showTab('admin')" class="py-1 px-3 rounded-full hover:bg-surface-container text-on-surface-variant font-medium">Admin</button>
+        </div>
+    </header>
+
+    <!-- ================= MAIN CONTENT CONTAINER ================= -->
+    <main class="flex-grow max-w-[1360px] mx-auto w-full px-4 sm:px-8 pt-6 pb-16">
+
+        <!-- ================================================================= -->
+        <!-- PAGE 1: CATALOG & REAL-TIME BRANCH AVAILABILITY MATRIX            -->
+        <!-- ================================================================= -->
+        <section id="tab-catalog" class="tab-content active space-y-12">
+
+            <!-- ================= VIDEO HERO PAGE WITH BOTTOM TITLE OVERLAY ================= -->
+            <div class="relative w-full rounded-3xl overflow-hidden shadow-[0_8px_32px_-4px_rgba(101,113,102,0.16)] border border-outline-variant/35 bg-surface-container-low mb-6">
+                <!-- Video Frames Canvas Player -->
+                <div class="relative w-full h-[380px] sm:h-[460px] md:h-[520px] lg:h-[580px] overflow-hidden bg-on-surface/5 flex items-center justify-center">
+                    <canvas id="hero-frame-canvas" class="w-full h-full object-cover"></canvas>
+                    
+                    <!-- Gentle Bottom Gradient for Crisp White Contrast -->
+                    <div class="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/75 via-black/35 to-transparent pointer-events-none"></div>
+
+                    <!-- Title Placed at Bottom of Video (In Circled Floor Area) in White Color -->
+                    <div class="absolute inset-x-0 bottom-0 pb-6 sm:pb-8 flex flex-col items-center justify-center text-center px-4 pointer-events-none z-10">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-emerald-300 text-[10px] sm:text-[11px] font-pixel tracking-wider border border-white/20 shadow-lg mb-2">
+                            <span>★</span>
+                            <span>Quiet Academic Stacks &amp; Inter-Branch Courier Transit</span>
+                            <span>★</span>
+                        </div>
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-pixel font-bold text-white tracking-widest uppercase drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] [text-shadow:_0_2px_14px_rgb(0_0_0_/_90%)]">
+                            CampusLib Exchange
+                        </h1>
+                        <p class="text-xs sm:text-sm md:text-base text-white/95 font-pixel tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)] mt-1 max-w-xl mx-auto">
+                            Inter-Branch Book Delivery Engine &amp; Real-Time Stacks Discovery
+                        </p>
+                    </div>
+
+                    <!-- Discreet Play/Pause button in corner -->
+                    <button id="hero-playback-toggle" onclick="toggleHeroPlayback()" 
+                            class="absolute bottom-4 right-4 z-20 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md text-white/90 hover:bg-black/80 flex items-center justify-center transition-colors shadow-md pointer-events-auto" 
+                            title="Pause / Resume Video">
+                        <span class="material-symbols-outlined text-sm" id="hero-play-icon" data-icon="pause">pause</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= COMPACT FLOATING SEARCH BAR UNDERNEATH HERO (Parchment Backdrop) ================= -->
+            <div id="catalog-search-section" class="parchment-search-card w-full max-w-[1240px] mx-auto space-y-4 p-5 sm:p-7 rounded-3xl border-2 border-[#5a412b] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7)] relative overflow-hidden">
+                <div class="relative z-10 space-y-4">
+                    <div class="relative bg-white/80 backdrop-blur-sm p-2 rounded-full border border-[#7d5f3f]/50 shadow-inner flex items-center gap-2">
+                        <div class="w-11 h-11 rounded-full bg-[#f2e7d5] flex items-center justify-center text-[#3d2e1e] shrink-0 ml-1 shadow-sm">
+                            <span class="material-symbols-outlined text-lg" data-icon="search">search</span>
+                        </div>
+                        <input type="text" id="catalog-search-input" oninput="handleSearchInput(event)" placeholder="Search by book title, author, or 13-digit ISBN..." 
+                               class="w-full bg-transparent border-0 text-[#1b1c1a] font-medium placeholder:text-[#7d6852] text-sm sm:text-base focus:ring-0 focus:outline-none px-2"/>
+                        <button id="btn-clear-search" onclick="clearSearch()" class="text-[#7d6852] hover:text-[#1b1c1a] px-2 transition-colors" title="Clear Search">
+                            <span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+                        </button>
+                        <div class="hidden sm:flex items-center pr-2">
+                            <span class="text-xs text-[#5c432d] px-2.5 py-1 rounded-full bg-[#ebdcc8] mr-2 font-mono border border-[#c4ab90]/60">⌘K</span>
+                        </div>
+                    </div>
+
+                    <!-- Suggested Discipline Tags -->
+                    <div class="flex items-center justify-center flex-wrap gap-2 text-xs">
+                        <span class="text-[#2b1c11] font-bold mr-1">Suggested:</span>
+                        <button onclick="quickSearch('')" class="suggested-pill px-3.5 py-1 rounded-full bg-[#3d4a3e] text-white hover:bg-[#2e3b2f] transition-colors border border-[#3d4a3e] font-medium shadow-sm">All Collections</button>
+                        <button onclick="quickSearch('Algorithms')" class="suggested-pill px-3.5 py-1 rounded-full bg-white/70 text-[#2b1c11] hover:bg-white transition-colors border border-[#7d5f3f]/40 font-medium shadow-sm">Algorithms (CLRS)</button>
+                        <button onclick="quickSearch('Operating System')" class="suggested-pill px-3.5 py-1 rounded-full bg-white/70 text-[#2b1c11] hover:bg-white transition-colors border border-[#7d5f3f]/40 font-medium shadow-sm">Operating Systems</button>
+                        <button onclick="quickSearch('Database')" class="suggested-pill px-3.5 py-1 rounded-full bg-white/70 text-[#2b1c11] hover:bg-white transition-colors border border-[#7d5f3f]/40 font-medium shadow-sm">Database Systems</button>
+                        <button onclick="quickSearch('Fluid')" class="suggested-pill px-3.5 py-1 rounded-full bg-white/70 text-[#2b1c11] hover:bg-white transition-colors border border-[#7d5f3f]/40 font-medium shadow-sm">Fluid Mechanics</button>
+                        <button onclick="quickSearch('Networks')" class="suggested-pill px-3.5 py-1 rounded-full bg-white/70 text-[#2b1c11] hover:bg-white transition-colors border border-[#7d5f3f]/40 font-medium shadow-sm">Networks</button>
+                    </div>
+
+                    <!-- Filter & Results Ribbon -->
+                    <div class="mt-4 flex flex-col sm:flex-row items-center justify-between border-t border-[#7d5f3f]/30 pt-4 gap-3 text-xs">
+                        <div class="text-xs font-bold text-[#2b1c11]" id="results-count-text">
+                            Showing campus holdings...
+                        </div>
+                        
+                        <!-- Interactive Branch & Availability Filter Bar -->
+                        <div class="flex items-center flex-wrap gap-2">
+                            <span class="text-[#2b1c11] font-bold text-xs hidden md:inline">Facility:</span>
+                            <div class="flex items-center bg-white/70 p-1 rounded-full border border-[#7d5f3f]/40 text-xs shadow-inner">
+                                <button id="branch-filter-ALL" onclick="setCatalogBranchFilter('ALL')" class="branch-pill active px-3 py-1 rounded-full font-medium transition-all">All 3 Campus Libraries</button>
+                                <button id="branch-filter-CENTRAL" onclick="setCatalogBranchFilter('CENTRAL')" class="branch-pill px-3 py-1 rounded-full font-medium transition-all">Central (CENTRAL)</button>
+                                <button id="branch-filter-CS-DEPT" onclick="setCatalogBranchFilter('CS-DEPT')" class="branch-pill px-3 py-1 rounded-full font-medium transition-all">CS Stacks</button>
+                                <button id="branch-filter-MECH-DEPT" onclick="setCatalogBranchFilter('MECH-DEPT')" class="branch-pill px-3 py-1 rounded-full font-medium transition-all">Mech Hall</button>
+                            </div>
+                            <button id="filter-available-toggle" onclick="toggleAvailableOnlyFilter()" class="px-3 py-1.5 rounded-full border border-[#7d5f3f]/40 bg-white/70 text-[#2b1c11] hover:bg-white transition-colors flex items-center gap-1 font-medium shadow-sm">
+                                <span class="material-symbols-outlined text-xs" id="avail-toggle-icon" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+                                <span>In Stock Only</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= CRUMPLED PARCHMENT SHOWCASE BACKDROP (download (3).jpg) ================= -->
+            <div id="catalog-parchment-runner" class="relative w-full rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 md:p-10 lg:p-12 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-2 border-[#3d2a1d]/70 overflow-hidden my-6">
+                <!-- Authentic Crumpled Paper Backdrop -->
+                <div class="absolute inset-0 bg-cover bg-center pointer-events-none" style="background-image: url('/parchment-bg.jpg');"></div>
+                
+                <!-- Gentle aged parchment vignette and warm edge tint -->
+                <div class="absolute inset-0 pointer-events-none shadow-[inset_0_0_90px_rgba(40,24,12,0.4)]"></div>
+
+                <!-- Open Tome Book Spreads Container (Livro Base sits inside) -->
+                <div id="books-grid" class="relative z-10 space-y-10 max-w-[1240px] mx-auto">
+                    <div class="text-center py-12 text-[#5c4733] font-headline italic">Opening campus library folios...</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- PAGE 2: LIVE COURIER & DELIVERY TRACKER (SWIGGY/AMAZON STYLE)      -->
+        <!-- ================================================================= -->
+        <section id="tab-tracker" class="tab-content space-y-10">
+
+            <!-- Section Banner -->
+            <div class="max-w-3xl mx-auto text-center p-6 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-container/40 text-secondary text-xs font-semibold mb-3 border border-secondary-fixed/40">
+                    <span class="w-2 h-2 rounded-full bg-secondary"></span>
+                    Live Campus Courier Pipeline
+                </div>
+                <h2 class="text-3xl font-headline font-semibold text-on-surface mb-2">My Requests, Deliveries &amp; Loans</h2>
+                <p class="text-sm text-on-surface-variant">
+                    Track the real-time custody journey of your requested books from holding stacks to your destination branch desk.
+                </p>
+            </div>
+
+            <!-- Active Transfers List Container -->
+            <div class="max-w-4xl mx-auto p-6 sm:p-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl space-y-6">
+                <div class="flex items-center justify-between border-b border-outline-variant/20 pb-4">
+                    <div>
+                        <h3 class="text-xl font-headline font-semibold text-on-surface flex items-center gap-2">
+                            <span>📦</span> Inter-Branch Transfers in Motion
+                        </h3>
+                        <p class="text-xs text-on-surface-variant mt-1">Live tracking of book reservations moving between campus libraries.</p>
+                    </div>
+                    <span class="text-xs text-outline font-medium px-3 py-1 rounded-full bg-surface-container-low border border-outline-variant/30 hidden sm:inline-block">Pessimistic-Locked</span>
+                </div>
+
+                <div id="transfers-list" class="space-y-6">
+                    <!-- Populated dynamically by app.js -->
+                    <div class="text-center py-10 text-outline">Loading your transfer orders...</div>
+                </div>
+            </div>
+
+            <!-- Active Borrowed Books (Loans) Container -->
+            <div class="max-w-4xl mx-auto p-6 sm:p-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl space-y-6">
+                <div class="flex items-center justify-between border-b border-outline-variant/20 pb-4">
+                    <div>
+                        <h3 class="text-xl font-headline font-semibold text-on-surface flex items-center gap-2">
+                            <span>📖</span> Active Reading Loans &amp; Circulation
+                        </h3>
+                        <p class="text-xs text-on-surface-variant mt-1">Books currently in your possession and due date tracker.</p>
+                    </div>
+                    <span class="text-xs text-outline font-medium px-3 py-1 rounded-full bg-surface-container-low border border-outline-variant/30 hidden sm:inline-block">14-Day Lending Window</span>
+                </div>
+
+                <div id="loans-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Populated dynamically by app.js -->
+                    <div class="col-span-full text-center py-6 text-outline">Loading active loans...</div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- PAGE 3: BRANCH LIBRARIAN OPERATIONS COMMAND DESK                  -->
+        <!-- ================================================================= -->
+        <section id="tab-librarian" class="tab-content space-y-8">
+
+            <!-- Section Header -->
+            <div class="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-fixed/30 text-tertiary text-xs font-semibold mb-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                        Branch Desk Fulfillment
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-headline font-semibold text-on-surface">Librarian Operations Desk</h2>
+                    <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                        <p class="text-xs sm:text-sm text-on-surface-variant" id="librarian-branch-indicator">
+                            Operating: All Campus Facilities
+                        </p>
+                        <div class="flex items-center gap-1.5 text-xs text-outline">
+                            <span>Queue Scope:</span>
+                            <select id="librarian-branch-filter" onchange="handleLibrarianBranchFilterChange()" class="bg-surface-container-lowest border border-outline-variant/40 rounded-full px-3 py-1 text-xs focus:ring-1 focus:ring-primary text-on-surface font-medium">
+                                <option value="">All Branches</option>
+                                <option value="1">Central University Library (CENTRAL)</option>
+                                <option value="2">Computer Science Library (CS-DEPT)</option>
+                                <option value="3">Mechanical Engineering Library (MECH-DEPT)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-tab Pills Switcher -->
+                <div class="flex items-center bg-surface-container-low p-1.5 rounded-full border border-outline-variant/30 self-start sm:self-auto">
+                    <button id="subtab-btn-dispatch" onclick="showSubTab('dispatch')" class="sub-tab-btn active px-4 py-2 rounded-full text-xs font-semibold transition-all">
+                        📦 Outbound Dispatch
+                    </button>
+                    <button id="subtab-btn-receive" onclick="showSubTab('receive')" class="sub-tab-btn px-4 py-2 rounded-full text-xs font-semibold transition-all">
+                        📥 Inbound Intake
+                    </button>
+                    <button id="subtab-btn-return" onclick="showSubTab('return')" class="sub-tab-btn px-4 py-2 rounded-full text-xs font-semibold transition-all">
+                        ⚡ Circulation &amp; Returns
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-TAB 1: OUTBOUND DISPATCH QUEUE -->
+            <div id="subtab-dispatch" class="subtab-content active max-w-4xl mx-auto p-6 sm:p-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl space-y-4">
+                <div class="bg-powder-sage/40 border border-sage-mist/60 rounded-xl p-4 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-primary text-xl" data-icon="inventory_2">inventory_2</span>
+                    <div class="text-xs text-on-surface">
+                        <strong>Outbound Pull Instructions:</strong> Fetch the physical volume from your branch shelf location specified below, verify the barcode, and click <em>"Dispatch to Transit"</em> to release it to the campus electric courier.
+                    </div>
+                </div>
+
+                <div id="dispatch-queue-container" class="space-y-4">
+                    <!-- Populated dynamically -->
+                    <div class="text-center py-10 text-outline">Loading dispatch queue...</div>
+                </div>
+            </div>
+
+            <!-- SUB-TAB 2: INBOUND RECEIVING INTAKE -->
+            <div id="subtab-receive" class="subtab-content max-w-4xl mx-auto p-6 sm:p-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl space-y-4">
+                <div class="bg-secondary-container/30 border border-secondary-fixed/50 rounded-xl p-4 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-secondary text-xl" data-icon="markunread_mailbox">markunread_mailbox</span>
+                    <div class="text-xs text-on-surface">
+                        <strong>Courier Arrival Intake:</strong> When the campus shuttle delivers inter-branch books to your counter, click <em>"Scan &amp; Receive Intake"</em>. This marks the parcel <strong>READY_FOR_PICKUP</strong> and activates the automated <strong>48-hour pickup countdown hold</strong>.
+                    </div>
+                </div>
+
+                <div id="receive-queue-container" class="space-y-4">
+                    <!-- Populated dynamically -->
+                    <div class="text-center py-10 text-outline">Loading inbound queue...</div>
+                </div>
+            </div>
+
+            <!-- SUB-TAB 3: CIRCULATION COUNTER (CHECKOUT & RETURNS) -->
+            <div id="subtab-return" class="subtab-content max-w-4xl mx-auto space-y-8">
+                
+                <!-- Branch Hold Shelf (Ready for Patron Pickup) -->
+                <div class="p-6 sm:p-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+                        <div>
+                            <h3 class="text-lg font-headline font-semibold text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-tertiary" data-icon="inventory">inventory</span>
+                                Branch Hold Shelf — Ready for Patron Pickup
+                            </h3>
+                            <p class="text-xs text-on-surface-variant">Arrived transit parcels awaiting student collection under 48-hour hold. Click 1-click issue to checkout immediately.</p>
+                        </div>
+                        <button onclick="loadHoldShelfQueue()" class="px-3 py-1 rounded-full bg-surface-container text-xs hover:bg-surface-container-high transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs" data-icon="refresh">refresh</span> Refresh Shelf
+                        </button>
+                    </div>
+                    <div id="hold-shelf-queue-container">
+                        <div class="text-center py-6 text-outline">Loading hold shelf...</div>
+                    </div>
+                </div>
+
+                <!-- Barcode Checkout Terminal Card -->
+                <div class="bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-outline-variant/35 shadow-xl space-y-4">
+                    <h3 class="text-lg font-headline font-semibold text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary" data-icon="barcode_scanner">barcode_scanner</span>
+                        Quick Circulation Checkout Terminal
+                    </h3>
+                    <p class="text-xs text-on-surface-variant">
+                        Scan the book barcode and select the registered patron to issue an immediate 14-day loan.
+                    </p>
+
+                    <form onsubmit="handleBarcodeCheckout(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
+                        <div class="sm:col-span-5">
+                            <label class="block text-xs font-semibold text-outline mb-1">Book Barcode</label>
+                            <input type="text" id="checkout-barcode-input" placeholder="e.g. BC-CS-101 or BC-CEN-201" required
+                                   class="w-full bg-surface-container-low border border-outline-variant/40 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"/>
+                        </div>
+                        <div class="sm:col-span-4">
+                            <label class="block text-xs font-semibold text-outline mb-1">Patron</label>
+                            <select id="checkout-student-select" required
+                                    class="w-full bg-surface-container-low border border-outline-variant/40 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                                <option value="1">Aarav Sharma (STU-2024-001)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-3 flex items-end">
+                            <button type="submit" class="w-full bg-primary-container text-on-primary-container rounded-full py-2.5 text-xs font-semibold hover:opacity-95 transition-all shadow-sm flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                                Issue Loan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Active Loans Return List -->
+                <div class="p-6 sm:p-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl space-y-4">
+                    <div class="pb-3 border-b border-outline-variant/20">
+                        <h3 class="text-lg font-headline font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary" data-icon="restart_alt">restart_alt</span>
+                            Active Campus Circulation &amp; Returns Processing
+                        </h3>
+                    </div>
+                    <div id="active-loans-container">
+                        <div class="text-center py-6 text-outline">Loading active loans...</div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- PAGE 4: CHIEF ADMINISTRATOR AUDIT & CONTROL CONSOLE               -->
+        <!-- ================================================================= -->
+        <section id="tab-admin" class="tab-content space-y-8">
+
+            <!-- Section Header -->
+            <div class="max-w-4xl mx-auto p-6 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-powder-sage/60 text-primary text-xs font-semibold mb-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    Campus Fleet Oversight
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-headline font-semibold text-on-surface">Campus Audit &amp; Chain of Custody</h2>
+                <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
+                    Cryptographically auditable and immutable event ledger tracking every transfer lifecycle state, loan origination, and 48-hour hold expiration across campus facilities.
+                </p>
+            </div>
+
+            <!-- Campus Holding Distribution Metrics -->
+            <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-powder-sage flex items-center justify-center text-primary text-xl">🏛️</div>
+                    <div>
+                        <div class="text-xs text-outline uppercase font-semibold">Central Library</div>
+                        <div class="text-xl font-headline font-bold text-on-surface" id="admin-central-metrics">Main Archive</div>
+                        <div class="text-[11px] text-primary" id="admin-central-sub">Available &amp; In-Transit</div>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-secondary text-xl">💻</div>
+                    <div>
+                        <div class="text-xs text-outline uppercase font-semibold">Turing CS Stacks</div>
+                        <div class="text-xl font-headline font-bold text-on-surface" id="admin-cs-metrics">Dept Library</div>
+                        <div class="text-[11px] text-secondary" id="admin-cs-sub">Computing &amp; Systems</div>
+                    </div>
+                </div>
+                <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-cream-vellum flex items-center justify-center text-tertiary text-xl">⚙️</div>
+                    <div>
+                        <div class="text-xs text-outline uppercase font-semibold">Franklin Mech Hall</div>
+                        <div class="text-xl font-headline font-bold text-on-surface" id="admin-mech-metrics">Dept Library</div>
+                        <div class="text-[11px] text-tertiary" id="admin-mech-sub">Fluids &amp; Structures</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Immutable Audit Ledger Table -->
+            <div class="max-w-4xl mx-auto p-6 sm:p-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-outline-variant/35 shadow-xl space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-outline-variant/20">
+                    <h3 class="text-lg font-headline font-semibold text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary" data-icon="history_edu">history_edu</span>
+                        Immutable Lifecycle Ledger (NFR-4)
+                    </h3>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <input type="text" id="audit-search-input" oninput="filterAuditLogs()" placeholder="Filter logs (entity, user)..." 
+                               class="bg-surface-container-lowest border border-outline-variant/40 rounded-full px-3 py-1 text-xs focus:ring-1 focus:ring-primary"/>
+                        <select id="audit-action-filter" onchange="filterAuditLogs()" 
+                                class="bg-surface-container-lowest border border-outline-variant/40 rounded-full px-3 py-1 text-xs focus:ring-1 focus:ring-primary text-on-surface">
+                            <option value="ALL">All Actions</option>
+                            <option value="REQUEST">Transfer Request</option>
+                            <option value="DISPATCH">Dispatch</option>
+                            <option value="RECEIVE">Receive Intake</option>
+                            <option value="CHECKOUT">Checkout</option>
+                            <option value="RETURN">Return</option>
+                            <option value="HOLD_EXPIRED">Hold Expired</option>
+                        </select>
+                        <button onclick="loadAdminData()" class="px-3 py-1 rounded-full bg-surface-container text-xs hover:bg-surface-container-high transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs" data-icon="refresh">refresh</span> Refresh Log
+                        </button>
+                    </div>
+                </div>
+
+                <div id="audit-table-container">
+                    <div class="text-center py-10 text-outline">Loading audit logs...</div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================================================================= -->
+    <!-- INTER-BRANCH TRANSFER RESERVATION MODAL                           -->
+    <!-- ================================================================= -->
+    <div id="transfer-modal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/30 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+        <div class="modal-card bg-surface-container-lowest rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-outline-variant/40 shadow-2xl space-y-6 transform scale-95 transition-transform duration-200">
+            
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-powder-sage flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+                    </div>
+                    <div>
+                        <h3 id="modal-book-title" class="text-xl font-headline font-semibold text-on-surface">Request Courier Delivery</h3>
+                        <p id="modal-book-details" class="text-xs text-outline">Author · ISBN</p>
+                    </div>
+                </div>
+                <button onclick="closeTransferModal()" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-outline hover:text-on-surface transition-colors">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Select Physical Copy -->
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                        1. Select Available Physical Volume
+                    </label>
+                    <select id="modal-copy-select" onchange="updateTransferSourceInfo()"
+                            class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                        <option value="">Fetching holdings...</option>
+                    </select>
+                    <div id="modal-source-shelf-hint" class="text-[11px] text-outline mt-1.5 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs" data-icon="pin_drop">pin_drop</span>
+                        Physical stack location
+                    </div>
+                </div>
+
+                <!-- Select Target Pickup Branch -->
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                        2. Select Your Destination Pickup Desk
+                    </label>
+                    <select id="modal-destination-select"
+                            class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                        <!-- Populated by loadBranches() -->
+                    </select>
+                </div>
+
+                <!-- ACID Concurrency Assurance Banner -->
+                <div class="bg-powder-sage/50 border border-sage-mist/60 rounded-xl p-3 flex items-start gap-2.5 text-xs text-on-surface">
+                    <span class="material-symbols-outlined text-primary text-base" data-icon="lock">lock</span>
+                    <div>
+                        <strong>ACID Concurrency Guarantee:</strong> Upon clicking confirm, a database-level pessimistic write lock will immediately reserve this physical volume, preventing any race-condition double bookings.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button onclick="closeTransferModal()" class="px-5 py-2.5 rounded-full border border-outline-variant/50 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors">
+                    Cancel
+                </button>
+                <button id="btn-confirm-transfer" onclick="submitTransferRequest()" class="px-6 py-2.5 rounded-full bg-primary-container text-on-primary-container text-xs font-semibold hover:opacity-95 transition-all shadow-sm flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm" data-icon="near_me">near_me</span>
+                    Confirm Transfer
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ================= AUTHENTICATION / ONBOARDING GATEKEEPER MODAL ================= -->
+    <div id="auth-modal" onclick="handleAuthModalBackdropClick(event)" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/50 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
+        <div onclick="event.stopPropagation()" class="modal-card bg-surface-container-lowest rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-outline-variant/40 shadow-2xl space-y-6 transform scale-95 transition-transform duration-200">
+            
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-primary-fixed flex items-center justify-center text-primary shadow-sm shrink-0">
+                        <span class="material-symbols-outlined text-2xl" data-icon="account_circle">account_circle</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-headline font-semibold text-on-surface">CampusLib Identity Portal</h3>
+                        <p class="text-xs text-outline">Create your login ID or sign in to borrow books</p>
+                    </div>
+                </div>
+                <button id="auth-modal-close-btn" onclick="closeAuthModal()" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-outline hover:text-on-surface transition-colors">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Tab Switcher: Register vs Login vs Demo -->
+            <div class="flex items-center bg-surface-container-low p-1.5 rounded-full border border-outline-variant/30 text-xs">
+                <button id="auth-tab-register" onclick="switchAuthTab('register')" class="auth-pill active flex-1 py-2 rounded-full font-semibold transition-all text-center">
+                    ✨ Create Login ID
+                </button>
+                <button id="auth-tab-login" onclick="switchAuthTab('login')" class="auth-pill flex-1 py-2 rounded-full font-semibold transition-all text-center">
+                    🔑 Sign In
+                </button>
+                <button id="auth-tab-demo" onclick="switchAuthTab('demo')" class="auth-pill flex-1 py-2 rounded-full font-semibold transition-all text-center">
+                    ⚡ Demo Access
+                </button>
+            </div>
+
+            <!-- TAB 1: REGISTER NEW USER -->
+            <form id="form-register" onsubmit="handleUserRegistration(event)" class="space-y-4">
+                <div class="bg-powder-sage/40 border border-sage-mist/60 rounded-xl p-3 text-xs text-on-surface flex items-start gap-2">
+                    <span class="material-symbols-outlined text-primary text-base shrink-0" data-icon="badge">badge</span>
+                    <div>
+                        <strong>Create your permanent campus identity:</strong> Choose your own login ID and password to access the unified inter-branch catalog and courier deliveries.
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+                        1. Choose Your Login ID / Student ID *
+                    </label>
+                    <input type="text" id="reg-university-id" placeholder="e.g. STU-2024-505 or custom username" required
+                           class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"/>
+                    <p class="text-[11px] text-outline mt-1">Unique campus identifier you will use to log in and pick up books.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+                        2. Full Legal Name *
+                    </label>
+                    <input type="text" id="reg-fullname" placeholder="e.g. Bhavesh Sharma" required
+                           class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"/>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+                        3. Campus Email Address *
+                    </label>
+                    <input type="email" id="reg-email" placeholder="e.g. bhavesh@campus.edu" required
+                           class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"/>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+                        4. Secure Password *
+                    </label>
+                    <input type="password" id="reg-password" placeholder="Min. 6 characters" minlength="6" required
+                           class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"/>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="btn-submit-register" class="w-full bg-primary-container text-on-primary-container rounded-full py-3 text-xs sm:text-sm font-semibold hover:opacity-95 transition-all shadow-md flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-base" data-icon="how_to_reg">how_to_reg</span>
+                        Create ID &amp; Enter Library
+                    </button>
+                </div>
+            </form>
+
+            <!-- TAB 2: SIGN IN WITH EXISTING ID -->
+            <form id="form-login" onsubmit="handleUserLogin(event)" class="space-y-4 hidden">
+                <div class="bg-secondary-container/30 border border-secondary-fixed/50 rounded-xl p-3 text-xs text-on-surface flex items-start gap-2">
+                    <span class="material-symbols-outlined text-secondary text-base shrink-0" data-icon="lock_open">lock_open</span>
+                    <div>
+                        <strong>Existing Account Login:</strong> Enter the University ID or Email you registered with.
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+                        Login ID or Email *
+                    </label>
+                    <input type="text" id="login-identifier" placeholder="e.g. STU-2024-001 or email@campus.edu" required
+                           class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"/>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
+                        Password *
+                    </label>
+                    <input type="password" id="login-password" placeholder="Enter your password" required
+                           class="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"/>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="btn-submit-login" class="w-full bg-secondary text-white rounded-full py-3 text-xs sm:text-sm font-semibold hover:opacity-95 transition-all shadow-md flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-base" data-icon="login">login</span>
+                        Sign In &amp; Continue
+                    </button>
+                </div>
+            </form>
+
+            <!-- TAB 3: DEMO FAST PASS -->
+            <div id="pane-demo" class="space-y-3 hidden">
+                <p class="text-xs text-outline">Select any pre-seeded persona for instant testing:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button type="button" onclick="loginWithPersona('student')" class="p-3 rounded-2xl border border-outline-variant/40 bg-surface-container-low hover:bg-powder-sage/50 text-left transition-all flex items-center gap-2.5">
+                        <span class="text-xl">🎓</span>
+                        <div>
+                            <div class="text-xs font-bold text-on-surface">Aarav Sharma</div>
+                            <div class="text-[10px] text-outline">Student (STU-2024-001)</div>
+                        </div>
+                    </button>
+                    <button type="button" onclick="loginWithPersona('cs_librarian')" class="p-3 rounded-2xl border border-outline-variant/40 bg-surface-container-low hover:bg-powder-sage/50 text-left transition-all flex items-center gap-2.5">
+                        <span class="text-xl">💻</span>
+                        <div>
+                            <div class="text-xs font-bold text-on-surface">Priya Nair</div>
+                            <div class="text-[10px] text-outline">CS Desk Librarian</div>
+                        </div>
+                    </button>
+                    <button type="button" onclick="loginWithPersona('central_librarian')" class="p-3 rounded-2xl border border-outline-variant/40 bg-surface-container-low hover:bg-powder-sage/50 text-left transition-all flex items-center gap-2.5">
+                        <span class="text-xl">🏛️</span>
+                        <div>
+                            <div class="text-xs font-bold text-on-surface">Rajesh Kumar</div>
+                            <div class="text-[10px] text-outline">Central Desk Librarian</div>
+                        </div>
+                    </button>
+                    <button type="button" onclick="loginWithPersona('admin')" class="p-3 rounded-2xl border border-outline-variant/40 bg-surface-container-low hover:bg-powder-sage/50 text-left transition-all flex items-center gap-2.5">
+                        <span class="text-xl">🛡️</span>
+                        <div>
+                            <div class="text-xs font-bold text-on-surface">Chief Admin</div>
+                            <div class="text-[10px] text-outline">Administrator</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ================= STAFF & ADMINISTRATION ACCESS (AT BOTTOM OF PAGE) ================= -->
+    <div class="max-w-[1360px] mx-auto w-full px-4 sm:px-8 pb-10">
+        <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 shadow-[0_2px_12px_-2px_rgba(101,113,102,0.06)] flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-xl" data-icon="admin_panel_settings">admin_panel_settings</span>
+                </div>
+                <div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-outline">Campus Operations &amp; Staff Portal</div>
+                    <div class="text-xs text-on-surface-variant">Switch operational desk or open administrator auditing:</div>
+                </div>
+            </div>
+
+            <!-- Personas Switcher (Bottom) -->
+            <div class="flex items-center flex-wrap gap-2" id="persona-chips">
+                <button id="chip-student" onclick="switchPersona('student')" class="chip active px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-outline-variant/40 hover:bg-surface-container transition-all">
+                    <span>🎓</span>
+                    <span id="chip-student-name">Student (Aarav)</span>
+                </button>
+                <button id="chip-cs" onclick="switchPersona('cs_librarian')" class="chip px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-outline-variant/40 hover:bg-surface-container transition-all">
+                    <span>💻</span>
+                    <span>CS Desk (Priya)</span>
+                </button>
+                <button id="chip-central" onclick="switchPersona('central_librarian')" class="chip px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-outline-variant/40 hover:bg-surface-container transition-all">
+                    <span>🏛️</span>
+                    <span>Central Desk (Rajesh)</span>
+                </button>
+                <button id="chip-admin" onclick="switchPersona('admin')" class="chip px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 border border-outline-variant/40 hover:bg-surface-container transition-all">
+                    <span>🛡️</span>
+                    <span>Admin Page &amp; Audit</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= STICKY PEACEFUL FOOTER ================= -->
+    <footer class="bg-surface-container-low border-t border-outline-variant/30 mt-auto">
+        <div class="max-w-[1360px] mx-auto px-4 sm:px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-sm" data-icon="auto_stories">auto_stories</span>
+                <span>© 2024 Athenaeum CampusLib Exchange. Campus Collegiate Inter-Branch Book Transfer System.</span>
+            </div>
+            <div class="flex items-center gap-4 text-outline">
+                <span>Central Library (Floor 1-4)</span>
+                <span>•</span>
+                <span>Turing CS Stacks</span>
+                <span>•</span>
+                <span>Franklin Mech Hall</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Frontend Application Logic -->
+    <script src="/app.js"></script>
+</body>
+</html>
