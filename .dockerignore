@@ -1,0 +1,7 @@
+target/
+.git/
+.agents/
+brag-output/
+*.log
+.mvn/apache-maven-*
+ezgif-6b0f39f001b4ceed-jpg/

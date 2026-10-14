@@ -1,0 +1,48 @@
+================================================================================
+SECTION 1: X / TWITTER (Hook + Link + Hashtags, under 280 characters)
+================================================================================
+A smarter way to manage campus libraries 🏛️⚡
+
+Built with Java 21 & Spring Boot 3.2: unified multi-branch cataloging, real-time 4-stage courier transit, 48h hold timers, and race-free checkout with JPA pessimistic write locking.
+
+Check it out: https://github.com/Bhavesh1424/Library-Management
+#Java #SpringBoot #WebDev #OpenSource
+
+================================================================================
+SECTION 2: LINKEDIN / HACKER NEWS (Technical Launch Showcase)
+================================================================================
+In multi-branch universities, managing library collections across separate campus locations introduces complex concurrency challenges: when hundreds of students and faculty simultaneously request scarce physical copies across branches, standard ORM writes frequently lead to phantom reservations, lost inventory, and race conditions.
+
+To solve this, I designed and built the Campus Library Management System—a full-stack, enterprise-grade platform engineered with Java 21, Spring Boot 3.2, Spring Security with stateless JWT authentication, and an interactive modern web frontend.
+
+Key Architectural Highlights:
+1. Concurrency Safety with Pessimistic Locking:
+All physical book copy claims utilize JPA `@Lock(LockModeType.PESSIMISTIC_WRITE)` with strict query timeouts to ensure deterministic serialization across simultaneous checkout attempts.
+
+2. Multi-Branch Campus Transit & Courier Logistics:
+Spans Central Campus, CS Turing Stacks, and Franklin Mechanical Hall. Inter-branch transfers are powered by an automated 4-stage courier state engine: PENDING_COURIER ➔ IN_TRANSIT ➔ ARRIVED_AT_DESTINATION ➔ READY_FOR_PICKUP.
+
+3. Automated 48-Hour Hold Lifecycle:
+When a requested book reaches the destination branch desk, a resilient 48-hour pickup reserve window begins, backed by an automated Spring scheduler that releases expired holds.
+
+4. Role-Segregated Workflows:
+Role-based workflows tailored for Students (self-service discovery, transfer requests, real-time transit stepper), Faculty (extended loan privileges), and Librarians (rapid barcode scanner desk, instant check-in/out, transfer manifest handling).
+
+Explore the code, architecture, and documentation on GitHub:
+👉 https://github.com/Bhavesh1424/Library-Management
+
+Feedback, comments, and stars are always appreciated!
+
+================================================================================
+SECTION 3: GITHUB README VIDEO EMBED SNIPPET
+================================================================================
+### Markdown Snippet:
+[![Library Management System Launch Showcase](brag-output/brag.jpg)](brag-output/brag.mp4)
+
+> 💡 *Click the preview image above to view the showcase video, or open `brag-output/brag.mp4` directly.*
+
+### HTML Snippet (for GitHub Pages / Web documentation):
+<video width="100%" max-width="960" controls poster="brag-output/brag.jpg">
+  <source src="brag-output/brag.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>

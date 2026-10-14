@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library Management System — 27s Showcase Launch Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #070a12;
+        color: #f8fafc;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 24px;
+        position: relative;
+        overflow-x: hidden;
+      }
+      .glow-1 {
+        position: absolute;
+        top: -150px;
+        left: 20%;
+        width: 800px;
+        height: 600px;
+        background: radial-gradient(ellipse, rgba(37, 99, 235, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+        pointer-events: none;
+      }
+      .glow-2 {
+        position: absolute;
+        bottom: -150px;
+        right: 20%;
+        width: 800px;
+        height: 600px;
+        background: radial-gradient(ellipse, rgba(6, 182, 212, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+        pointer-events: none;
+      }
+      .container {
+        width: 100%;
+        max-width: 1100px;
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        background: rgba(30, 58, 138, 0.4);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #38bdf8;
+        margin-bottom: 20px;
+      }
+      h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: clamp(32px, 5vw, 48px);
+        font-weight: 800;
+        text-align: center;
+        letter-spacing: -0.02em;
+        margin-bottom: 12px;
+        line-height: 1.15;
+      }
+      p.subtitle {
+        font-size: 18px;
+        color: #94a3b8;
+        text-align: center;
+        max-width: 720px;
+        margin-bottom: 32px;
+      }
+      .video-wrapper {
+        width: 100%;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #0b1120;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.8), 0 0 50px rgba(56, 189, 248, 0.15);
+        aspect-ratio: 16 / 9;
+        position: relative;
+      }
+      video {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        width: 100%;
+        margin-top: 32px;
+      }
+      .meta-card {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 16px 20px;
+        backdrop-filter: blur(12px);
+      }
+      .meta-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .meta-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: #e2e8f0;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 28px;
+        border-radius: 9999px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #0284c7);
+        color: #ffffff;
+        box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px -5px rgba(14, 165, 233, 0.6);
+      }
+      .btn-secondary {
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #e2e8f0;
+      }
+      .btn-secondary:hover {
+        background: rgba(51, 65, 85, 0.8);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+
+    <div class="container">
+      <div class="badge">
+        <span>🎬</span>
+        <span>Rendered 27s Launch Showcase</span>
+      </div>
+
+      <h1>Library Management System</h1>
+      <p class="subtitle">
+        High-Definition Showcase Video with synchronized audio bed, authentic running application screens, and verified architecture.
+      </p>
+
+      <div class="video-wrapper">
+        <video controls autoplay poster="brag.jpg" playsinline>
+          <source src="brag.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="meta-label">Duration</div>
+          <div class="meta-value">27.000s (810 frames)</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Resolution</div>
+          <div class="meta-value">1920 × 1080 (1080p Full HD)</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Video Codec</div>
+          <div class="meta-value">H.264 High · 30 FPS</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Audio Bed</div>
+          <div class="meta-value">AAC 48kHz Stereo · 110 BPM</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="brag.mp4" download class="btn btn-primary">
+          <span>⬇️</span>
+          <span>Download brag.mp4</span>
+        </a>
+        <a href="http://localhost:8080" target="_blank" class="btn btn-secondary">
+          <span>🏛️</span>
+          <span>Open Live App (Port 8080)</span>
+        </a>
+        <a href="https://github.com/Bhavesh1424/Library-Management" target="_blank" class="btn btn-secondary">
+          <span>🐙</span>
+          <span>GitHub Repository</span>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

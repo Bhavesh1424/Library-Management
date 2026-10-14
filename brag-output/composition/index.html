@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Library Management System — Showcase Launch</title>
+    <!-- Modern Editorial & Code Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- GSAP for seek-safe deterministic timeline animation -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #070a12;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        color: #f8fafc;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Root Composition Canvas */
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 20%, #0d1527 0%, #070a12 70%, #04060a 100%);
+      }
+
+      /* Subtle Cinematic Ambient Lighting */
+      .ambient-glow-1 {
+        position: absolute;
+        top: -160px;
+        left: 20%;
+        width: 1100px;
+        height: 700px;
+        background: radial-gradient(ellipse, rgba(37, 99, 235, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
+        pointer-events: none;
+        z-index: 1;
+      }
+      .ambient-glow-2 {
+        position: absolute;
+        bottom: -200px;
+        right: 15%;
+        width: 900px;
+        height: 600px;
+        background: radial-gradient(ellipse, rgba(6, 182, 212, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* Global Top Masthead */
+      .masthead {
+        position: absolute;
+        top: 36px;
+        left: 64px;
+        right: 64px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 60;
+      }
+      .masthead-logo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .masthead-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1e3a8a, #0284c7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: 0 4px 16px rgba(14, 165, 233, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .masthead-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: #f8fafc;
+      }
+      .masthead-badge {
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        padding: 8px 18px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #38bdf8;
+        text-transform: uppercase;
+        backdrop-filter: blur(12px);
+      }
+
+      /* Scene Clip Container (Visibility controlled by Hyperframes runtime) */
+      .scene-clip {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        z-index: 10;
+      }
+
+      /* Scene Content Layer (Target of GSAP animations) */
+      .scene-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 80px;
+      }
+
+      /* Typography */
+      .hero-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.08;
+        color: #f8fafc;
+      }
+      .mono-text {
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      /* Glassmorphic Panel */
+      .glass-panel {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      }
+
+      /* Browser Mockup Window */
+      .browser-window {
+        position: relative;
+        background: #0b1120;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.75), 0 0 40px rgba(56, 189, 248, 0.12);
+      }
+      .browser-topbar {
+        background: #111827;
+        padding: 12px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .browser-dots {
+        display: flex;
+        gap: 8px;
+      }
+      .browser-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .browser-url {
+        flex: 1;
+        max-width: 500px;
+        margin: 0 auto;
+        background: rgba(30, 41, 59, 0.7);
+        border-radius: 8px;
+        padding: 6px 16px;
+        font-size: 13px;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Tech Stack Pill */
+      .tech-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 9999px;
+        background: rgba(30, 41, 59, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        font-size: 15px;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+      }
+
+      /* Global Fade Overlay for End */
+      #fade-overlay {
+        position: absolute;
+        inset: 0;
+        background: #000000;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Root Composition Canvas Wrapper (Strict Hyperframes Contract) -->
+    <div data-hf-id="hf-0mtn" id="root" data-composition-id="main" data-start="0" data-duration="27" data-width="1920" data-height="1080">
+      <!-- Background Music Bed (Loop-free, 110 BPM electronic groove) -->
+      <audio data-hf-id="hf-ntvt" id="bg-music" class="clip" data-start="0" data-duration="27" data-track-index="10" data-volume="0.36" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+
+      <!-- Synchronized UI and Cinematic SFX -->
+      <audio data-hf-id="hf-tuac" id="sfx-cinematic" class="clip" data-start="3.4" data-duration="0.18" data-track-index="11" data-volume="0.65" src="assets/sfx/impact/impactSoft_medium_001.ogg"></audio>
+
+      <audio data-hf-id="hf-g06h" id="sfx-organize" class="clip" data-start="9.0" data-duration="0.02" data-track-index="12" data-volume="0.55" src="assets/sfx/interface/click_002.ogg"></audio>
+
+      <audio data-hf-id="hf-wfco" id="sfx-track" class="clip" data-start="11.3" data-duration="0.02" data-track-index="13" data-volume="0.55" src="assets/sfx/interface/click_002.ogg"></audio>
+
+      <audio data-hf-id="hf-8phn" id="sfx-simplify" class="clip" data-start="13.6" data-duration="0.12" data-track-index="14" data-volume="0.65" src="assets/sfx/interface/bong_001.ogg"></audio>
+
+      <audio data-hf-id="hf-qsyv" id="sfx-build" class="clip" data-start="16.0" data-duration="0.11" data-track-index="15" data-volume="0.6" src="assets/sfx/interface/drop_001.ogg"></audio>
+
+      <!-- Ambient Decorative Glows -->
+      <div data-hf-id="hf-tbfo" class="ambient-glow-1"></div>
+      <div data-hf-id="hf-1zbj" class="ambient-glow-2"></div>
+
+      <!-- Global Masthead -->
+      <header data-hf-id="hf-vcxt" class="masthead">
+        <div data-hf-id="hf-lvyn" class="masthead-logo">
+          <div data-hf-id="hf-6ex1" class="masthead-icon">🏛️</div>
+          <span data-hf-id="hf-7qck" class="masthead-title">Library Management System</span>
+        </div>
+        <div data-hf-id="hf-26jf" class="masthead-badge">Enterprise Campus Edition</div>
+      </header>
+
+      <!-- ================= SCENE 1: THE HOOK (0.0s – 4.0s) ================= -->
+      <!-- Visual: Dark background, subtle blue lighting, elegant animated typography. -->
+      <!-- Text: “A smarter way to manage libraries.” -->
+      <!-- Transition: Smooth zoom with cinematic sound effect. -->
+      <div data-hf-id="hf-fw7t" id="clip-scene-1" class="scene-clip clip" data-start="0" data-duration="4.0" data-track-index="1">
+        <div data-hf-id="hf-qudo" id="scene-1-content" class="scene-content">
+          <div data-hf-id="hf-2g1h" id="s1-zoom-wrapper" style="text-align: center; max-width: 1300px">
+            <!-- Category Tag -->
+            <div data-hf-id="hf-a0xy" id="s1-tag" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 24px;
+                background: rgba(30, 58, 138, 0.35);
+                border: 1px solid rgba(56, 189, 248, 0.4);
+                border-radius: 9999px;
+                font-size: 15px;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: #38bdf8;
+                margin-bottom: 32px;
+                backdrop-filter: blur(12px);
+              ">
+              <span data-hf-id="hf-okn4">⚡</span>
+              <span data-hf-id="hf-nwj2">Next-Gen Campus Circulation &amp; Logistics</span>
+            </div>
+
+            <!-- Main Script Headline -->
+            <h1 data-hf-id="hf-ktrs" id="s1-headline" class="hero-title" style="font-size: 82px; margin-bottom: 32px">
+              A smarter way to<br data-hf-id="hf-x5px">
+              <span data-hf-id="hf-d2k6" style="
+                  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #e0f2fe 100%);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                ">
+                manage libraries.
+              </span>
+            </h1>
+
+            <!-- Subtitle Features -->
+            <p data-hf-id="hf-zgi8" id="s1-subtext" style="
+                font-size: 26px;
+                color: #94a3b8;
+                line-height: 1.5;
+                max-width: 960px;
+                margin: 0 auto 44px auto;
+                font-weight: 400;
+              ">
+              Unified inter-branch cataloging, real-time courier dispatch, and race-free checkout serialization.
+            </p>
+
+            <!-- Campus Branches Pill Row -->
+            <div data-hf-id="hf-b7fn" id="s1-pills" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap">
+              <div data-hf-id="hf-nipk" class="tech-pill">🏛️ Central Campus</div>
+              <div data-hf-id="hf-nv5k" class="tech-pill">💻 CS Turing Stacks</div>
+              <div data-hf-id="hf-uwcv" class="tech-pill">⚙️ Franklin Mech Hall</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCENE 2: PRODUCT REVEAL (4.0s – 9.0s) ================= -->
+      <!-- Visual: Reveal actual interface with slow camera push-in and tasteful highlights. -->
+      <!-- Text: “Meet your Library Management System.” -->
+      <!-- Genuine running application screen. -->
+      <div data-hf-id="hf-hnci" id="clip-scene-2" class="scene-clip clip" data-start="4.0" data-duration="5.0" data-track-index="2">
+        <div data-hf-id="hf-8yuf" id="scene-2-content" class="scene-content">
+          <!-- Floating Title Header -->
+          <div data-hf-id="hf-bjb1" id="s2-header" style="text-align: center; margin-bottom: 24px">
+            <div data-hf-id="hf-ya6l" style="
+                display: inline-block;
+                padding: 6px 18px;
+                border-radius: 9999px;
+                background: rgba(14, 165, 233, 0.15);
+                border: 1px solid rgba(56, 189, 248, 0.35);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #38bdf8;
+                margin-bottom: 10px;
+              ">
+              Product Reveal
+            </div>
+            <h2 data-hf-id="hf-hkgi" class="hero-title" style="font-size: 48px">
+              Meet your Library Management System.
+            </h2>
+          </div>
+
+          <!-- Genuine Application Window Mockup with Slow Camera Push-in -->
+          <div data-hf-id="hf-2dsz" id="s2-browser" class="browser-window" style="width: 1440px; height: 740px">
+            <div data-hf-id="hf-nvbh" class="browser-topbar">
+              <div data-hf-id="hf-3pnd" class="browser-dots">
+                <div data-hf-id="hf-0ld2" class="browser-dot" style="background: #ef4444"></div>
+                <div data-hf-id="hf-ixi8" class="browser-dot" style="background: #eab308"></div>
+                <div data-hf-id="hf-cxhp" class="browser-dot" style="background: #22c55e"></div>
+              </div>
+              <div data-hf-id="hf-pdgf" class="browser-url mono-text">
+                <span data-hf-id="hf-pxks" style="color: #38bdf8">🔒</span>
+                <span data-hf-id="hf-p6vb">http://localhost:8080/stacks &#160;·&#160; Live Campus System</span>
+              </div>
+              <div data-hf-id="hf-6kr4" style="font-size: 13px; color: #94a3b8; font-weight: 600">
+                Connected: 3 Campus Branches
+              </div>
+            </div>
+
+            <!-- High-Res Live Application Capture -->
+            <div data-hf-id="hf-805s" style="position: relative; width: 100%; height: calc(100% - 45px); overflow: hidden">
+              <img data-hf-id="hf-5qsv" src="assets/screen-reveal.png" alt="Genuine Library Management System Interface" style="width: 100%; height: 100%; object-fit: cover; object-position: top center">
+              <!-- Subtle Edge Gradient Vignette -->
+              <div data-hf-id="hf-wlsv" style="
+                  position: absolute;
+                  inset: 0;
+                  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+                  pointer-events: none;
+                "></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCENE 3: FEATURE SHOWCASE (9.0s – 16.0s) ================= -->
+      <!-- Visual: Quick, synchronized cuts showcasing implemented features. -->
+      <!-- Text Sequence: “Organize.” (9–11.3s), “Track.” (11.3–13.6s), “Simplify.” (13.6–16s) -->
+      <div data-hf-id="hf-dwm3" id="clip-scene-3" class="scene-clip clip" data-start="9.0" data-duration="7.0" data-track-index="3">
+        <div data-hf-id="hf-grb5" id="scene-3-content" class="scene-content" style="padding: 40px 80px">
+          <!-- 3.1: ORGANIZE (9.0s – 11.3s) -->
+          <div data-hf-id="hf-b387" id="s3-feature-organize" style="
+              position: absolute;
+              inset: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 80px;
+            ">
+            <!-- Kinetic Word Header -->
+            <div data-hf-id="hf-pgxu" style="text-align: center; margin-bottom: 20px">
+              <span data-hf-id="hf-san8" style="
+                  font-family: 'Outfit', sans-serif;
+                  font-size: 64px;
+                  font-weight: 900;
+                  letter-spacing: -0.02em;
+                  color: #38bdf8;
+                  display: block;
+                  line-height: 1;
+                ">
+                Organize.
+              </span>
+              <span data-hf-id="hf-962x" style="
+                  font-size: 20px;
+                  color: #cbd5e1;
+                  font-weight: 600;
+                  margin-top: 6px;
+                  display: block;
+                ">
+                Unified Multi-Branch Catalog &amp; Deep Stacks Search
+              </span>
+            </div>
+
+            <!-- Genuine Screen Mockup -->
+            <div data-hf-id="hf-47nn" class="browser-window" style="width: 1400px; height: 720px">
+              <div data-hf-id="hf-ljep" class="browser-topbar">
+                <div data-hf-id="hf-fre5" class="browser-dots">
+                  <div data-hf-id="hf-h86i" class="browser-dot" style="background: #ef4444"></div>
+                  <div data-hf-id="hf-3ti0" class="browser-dot" style="background: #eab308"></div>
+                  <div data-hf-id="hf-bwld" class="browser-dot" style="background: #22c55e"></div>
+                </div>
+                <div data-hf-id="hf-kkin" class="browser-url mono-text">
+                  <span data-hf-id="hf-bxqe">http://localhost:8080/stacks#catalog</span>
+                </div>
+                <div data-hf-id="hf-m1dy" class="mono-text" style="font-size: 12px; color: #38bdf8">
+                  STATUS: 200 OK · 12 BOOKS LOADED
+                </div>
+              </div>
+              <div data-hf-id="hf-ojl2" style="width: 100%; height: calc(100% - 45px); overflow: hidden">
+                <img data-hf-id="hf-h7r1" src="assets/screen-organize.png" alt="Organize Stacks & Catalog" style="width: 100%; height: 100%; object-fit: cover; object-position: top center">
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.2: TRACK (11.3s – 13.6s) -->
+          <div data-hf-id="hf-bwpr" id="s3-feature-track" style="
+              position: absolute;
+              inset: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 80px;
+              opacity: 0;
+            ">
+            <!-- Kinetic Word Header -->
+            <div data-hf-id="hf-5m5i" style="text-align: center; margin-bottom: 20px">
+              <span data-hf-id="hf-a3n6" style="
+                  font-family: 'Outfit', sans-serif;
+                  font-size: 64px;
+                  font-weight: 900;
+                  letter-spacing: -0.02em;
+                  color: #f59e0b;
+                  display: block;
+                  line-height: 1;
+                ">
+                Track.
+              </span>
+              <span data-hf-id="hf-9ekt" style="
+                  font-size: 20px;
+                  color: #cbd5e1;
+                  font-weight: 600;
+                  margin-top: 6px;
+                  display: block;
+                ">
+                Real-Time 4-Stage Campus Courier Logistics
+              </span>
+            </div>
+
+            <!-- Genuine Screen Mockup -->
+            <div data-hf-id="hf-awqr" class="browser-window" style="width: 1400px; height: 720px">
+              <div data-hf-id="hf-mqbs" class="browser-topbar">
+                <div data-hf-id="hf-gyb8" class="browser-dots">
+                  <div data-hf-id="hf-hmhj" class="browser-dot" style="background: #ef4444"></div>
+                  <div data-hf-id="hf-2mkx" class="browser-dot" style="background: #eab308"></div>
+                  <div data-hf-id="hf-d3ig" class="browser-dot" style="background: #22c55e"></div>
+                </div>
+                <div data-hf-id="hf-k67m" class="browser-url mono-text">
+                  <span data-hf-id="hf-4iql">http://localhost:8080/stacks#tracker</span>
+                </div>
+                <div data-hf-id="hf-5c1a" class="mono-text" style="font-size: 12px; color: #f59e0b">
+                  STAGE: IN_TRANSIT ➔ READY_FOR_PICKUP
+                </div>
+              </div>
+              <div data-hf-id="hf-q016" style="width: 100%; height: calc(100% - 45px); overflow: hidden">
+                <img data-hf-id="hf-3d6p" src="assets/screen-track.png" alt="Real-Time Courier Tracker" style="width: 100%; height: 100%; object-fit: cover; object-position: top center">
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.3: SIMPLIFY (13.6s – 16.0s) -->
+          <div data-hf-id="hf-hze1" id="s3-feature-simplify" style="
+              position: absolute;
+              inset: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 40px 80px;
+              opacity: 0;
+            ">
+            <!-- Kinetic Word Header -->
+            <div data-hf-id="hf-60gj" style="text-align: center; margin-bottom: 20px">
+              <span data-hf-id="hf-83cm" style="
+                  font-family: 'Outfit', sans-serif;
+                  font-size: 64px;
+                  font-weight: 900;
+                  letter-spacing: -0.02em;
+                  color: #10b981;
+                  display: block;
+                  line-height: 1;
+                ">
+                Simplify.
+              </span>
+              <span data-hf-id="hf-ctqy" style="
+                  font-size: 20px;
+                  color: #cbd5e1;
+                  font-weight: 600;
+                  margin-top: 6px;
+                  display: block;
+                ">
+                Instant Barcode Circulation &amp; 48-Hour Pickup Holds
+              </span>
+            </div>
+
+            <!-- Genuine Screen Mockup -->
+            <div data-hf-id="hf-aifq" class="browser-window" style="width: 1400px; height: 720px">
+              <div data-hf-id="hf-mc0r" class="browser-topbar">
+                <div data-hf-id="hf-gk07" class="browser-dots">
+                  <div data-hf-id="hf-i0sk" class="browser-dot" style="background: #ef4444"></div>
+                  <div data-hf-id="hf-30vy" class="browser-dot" style="background: #eab308"></div>
+                  <div data-hf-id="hf-cp7f" class="browser-dot" style="background: #22c55e"></div>
+                </div>
+                <div data-hf-id="hf-jrwl" class="browser-url mono-text">
+                  <span data-hf-id="hf-pnah">http://localhost:8080/stacks#librarian</span>
+                </div>
+                <div data-hf-id="hf-eazs" class="mono-text" style="font-size: 12px; color: #10b981">
+                  BARCODE SCANNER READY · DESK DESPATCH ACTIVE
+                </div>
+              </div>
+              <div data-hf-id="hf-qec7" style="width: 100%; height: calc(100% - 45px); overflow: hidden">
+                <img data-hf-id="hf-ryxg" src="assets/screen-simplify.png" alt="Librarian Desk Circulation" style="width: 100%; height: 100%; object-fit: cover; object-position: top center">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCENE 4: BEHIND THE BUILD (16.0s – 23.0s) ================= -->
+      <!-- Visual: Transition to genuine source code and GitHub repository card. -->
+      <!-- Text: “Built with code. Designed for efficiency.” -->
+      <!-- Technologies: Java 21, Spring Boot 3.2, Spring Security & JWT, JPA Locking. -->
+      <div data-hf-id="hf-aqpf" id="clip-scene-4" class="scene-clip clip" data-start="16.0" data-duration="7.0" data-track-index="4">
+        <div data-hf-id="hf-z62x" id="scene-4-content" class="scene-content">
+          <!-- Scene Title -->
+          <div data-hf-id="hf-w9lv" id="s4-header" style="text-align: center; margin-bottom: 28px">
+            <div data-hf-id="hf-ues4" style="
+                display: inline-block;
+                padding: 6px 18px;
+                border-radius: 9999px;
+                background: rgba(99, 102, 241, 0.15);
+                border: 1px solid rgba(129, 140, 248, 0.35);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #a5b4fc;
+                margin-bottom: 10px;
+              ">
+              Architecture &amp; Engineering
+            </div>
+            <h2 data-hf-id="hf-fou2" class="hero-title" style="font-size: 50px">
+              Built with code. Designed for efficiency.
+            </h2>
+          </div>
+
+          <!-- Split Dual Presentation: Genuine Code + GitHub Spec Card -->
+          <div data-hf-id="hf-we37" id="s4-split" style="
+              display: grid;
+              grid-template-columns: 1.15fr 0.85fr;
+              gap: 36px;
+              width: 1540px;
+              align-items: stretch;
+            ">
+            <!-- Left: Genuine Production Source Code Editor -->
+            <div data-hf-id="hf-y3k1" class="glass-panel" style="border-radius: 20px; overflow: hidden; display: flex; flex-direction: column">
+              <div data-hf-id="hf-8hab" style="
+                  background: rgba(30, 41, 59, 0.8);
+                  padding: 14px 20px;
+                  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                ">
+                <div data-hf-id="hf-je8m" style="display: flex; align-items: center; gap: 10px">
+                  <span data-hf-id="hf-ruo8" style="color: #f59e0b">☕</span>
+                  <span data-hf-id="hf-6ddc" class="mono-text" style="font-size: 14px; font-weight: 600; color: #f1f5f9">
+                    BranchCopyRepository.java
+                  </span>
+                </div>
+                <div data-hf-id="hf-1bwn" class="mono-text" style="font-size: 12px; color: #38bdf8">
+                  PESSIMISTIC_WRITE LOCKING
+                </div>
+              </div>
+
+              <!-- Genuine Source Code Lines -->
+              <div data-hf-id="hf-4rfd" class="mono-text" style="
+                  padding: 24px 28px;
+                  font-size: 15px;
+                  line-height: 1.75;
+                  color: #e2e8f0;
+                  flex: 1;
+                  background: #090e17;
+                ">
+                <div data-hf-id="hf-txiy" style="color: #94a3b8">// NFR-1 Concurrency Guard: Prevents race conditions</div>
+                <div data-hf-id="hf-qipz" style="color: #94a3b8">// during simultaneous inter-branch checkout holds</div>
+                <div data-hf-id="hf-6cca" style="margin-top: 8px">
+                  <span data-hf-id="hf-yh9o" style="color: #f43f5e">@Lock</span>(<span data-hf-id="hf-68vc" style="color: #38bdf8">LockModeType.PESSIMISTIC_WRITE</span>)
+                </div>
+                <div data-hf-id="hf-its4">
+                  <span data-hf-id="hf-dcw5" style="color: #f43f5e">@QueryHints</span>({<span data-hf-id="hf-4qus" style="color: #f43f5e">@QueryHint</span>(name = <span data-hf-id="hf-eqv8" style="color: #a3e635">"jakarta.persistence.lock.timeout"</span>, value = <span data-hf-id="hf-l0k6" style="color: #a3e635">"3000"</span>)})
+                </div>
+                <div data-hf-id="hf-d0mb">
+                  <span data-hf-id="hf-ogsx" style="color: #f43f5e">@Query</span>(<span data-hf-id="hf-hkq7" style="color: #a3e635">"SELECT c FROM BranchCopy c WHERE c.id = :id"</span>)
+                </div>
+                <div data-hf-id="hf-wnn1" style="margin-top: 4px">
+                  <span data-hf-id="hf-s6hu" style="color: #818cf8">Optional</span>&lt;<span data-hf-id="hf-t6ny" style="color: #38bdf8">BranchCopy</span>&gt; <span data-hf-id="hf-iu5w" style="color: #facc15">findByIdForUpdate</span>(<span data-hf-id="hf-ihxc" style="color: #f43f5e">@Param</span>(<span data-hf-id="hf-ihjo" style="color: #a3e635">"id"</span>) <span data-hf-id="hf-95fo" style="color: #818cf8">Long</span> id);
+                </div>
+
+                <div data-hf-id="hf-u4mj" style="margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08)">
+                  <div data-hf-id="hf-79wd" style="color: #94a3b8">// Automated 48-hour reserve expiration scheduler</div>
+                  <div data-hf-id="hf-xhhc">
+                    <span data-hf-id="hf-wt62" style="color: #f43f5e">@Scheduled</span>(cron = <span data-hf-id="hf-8bqc" style="color: #a3e635">"0 */15 * * * *"</span>)
+                  </div>
+                  <div data-hf-id="hf-yeow">
+                    <span data-hf-id="hf-v9ps" style="color: #f43f5e">@Transactional</span>
+                  </div>
+                  <div data-hf-id="hf-9347">
+                    <span data-hf-id="hf-9xij" style="color: #818cf8">public void</span> <span data-hf-id="hf-2m0f" style="color: #facc15">releaseExpiredPickupHolds</span>() { ... }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Verified Technologies & Architecture Details -->
+            <div data-hf-id="hf-ifdw" class="glass-panel" style="border-radius: 20px; padding: 32px 36px; display: flex; flex-direction: column; justify-content: space-between">
+              <div data-hf-id="hf-y7yw">
+                <div data-hf-id="hf-rpd8" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 20px;
+                  ">
+                  <span data-hf-id="hf-mb5s" style="font-size: 28px">📦</span>
+                  <div data-hf-id="hf-x11t">
+                    <h3 data-hf-id="hf-0vyd" style="font-size: 22px; font-weight: 700; color: #f8fafc">
+                      Verified Technology Stack
+                    </h3>
+                    <p data-hf-id="hf-if1r" style="font-size: 14px; color: #94a3b8">
+                      Full-stack reactive collegiate architecture
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Verified Technologies Grid -->
+                <div data-hf-id="hf-y837" style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px">
+                  <div data-hf-id="hf-mroa" style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      background: rgba(30, 41, 59, 0.6);
+                      padding: 12px 18px;
+                      border-radius: 12px;
+                      border: 1px solid rgba(255, 255, 255, 0.08);
+                    ">
+                    <span data-hf-id="hf-17l1" style="font-weight: 600; color: #e2e8f0">Backend Framework</span>
+                    <span data-hf-id="hf-i09y" class="mono-text" style="color: #38bdf8; font-weight: 700; font-size: 14px">
+                      Spring Boot 3.2 · Java 21
+                    </span>
+                  </div>
+
+                  <div data-hf-id="hf-22m6" style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      background: rgba(30, 41, 59, 0.6);
+                      padding: 12px 18px;
+                      border-radius: 12px;
+                      border: 1px solid rgba(255, 255, 255, 0.08);
+                    ">
+                    <span data-hf-id="hf-3ei3" style="font-weight: 600; color: #e2e8f0">Security &amp; Auth</span>
+                    <span data-hf-id="hf-lfv8" class="mono-text" style="color: #818cf8; font-weight: 700; font-size: 14px">
+                      Spring Security + JWT
+                    </span>
+                  </div>
+
+                  <div data-hf-id="hf-2gx7" style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      background: rgba(30, 41, 59, 0.6);
+                      padding: 12px 18px;
+                      border-radius: 12px;
+                      border: 1px solid rgba(255, 255, 255, 0.08);
+                    ">
+                    <span data-hf-id="hf-h6c4" style="font-weight: 600; color: #e2e8f0">Concurrency Engine</span>
+                    <span data-hf-id="hf-uyqn" class="mono-text" style="color: #f59e0b; font-weight: 700; font-size: 14px">
+                      JPA Pessimistic Locking
+                    </span>
+                  </div>
+
+                  <div data-hf-id="hf-2v88" style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      background: rgba(30, 41, 59, 0.6);
+                      padding: 12px 18px;
+                      border-radius: 12px;
+                      border: 1px solid rgba(255, 255, 255, 0.08);
+                    ">
+                    <span data-hf-id="hf-l33q" style="font-weight: 600; color: #e2e8f0">Persistence</span>
+                    <span data-hf-id="hf-yink" class="mono-text" style="color: #10b981; font-weight: 700; font-size: 14px">
+                      Spring Data JPA · H2 Database
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- GitHub Repo Link Banner -->
+              <div data-hf-id="hf-z1xu" style="
+                  margin-top: 24px;
+                  background: rgba(15, 23, 42, 0.85);
+                  border: 1px solid rgba(56, 189, 248, 0.3);
+                  border-radius: 14px;
+                  padding: 16px 20px;
+                  display: flex;
+                  align-items: center;
+                  gap: 14px;
+                ">
+                <span data-hf-id="hf-zoh3" style="font-size: 26px">🐙</span>
+                <div data-hf-id="hf-xfcu">
+                  <div data-hf-id="hf-xjrw" style="font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase">
+                    GitHub Repository
+                  </div>
+                  <div data-hf-id="hf-7nyz" class="mono-text" style="font-size: 14px; color: #38bdf8; font-weight: 700">
+                    Bhavesh1424/Library-Management
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCENE 5: CLOSING (23.0s – 27.0s) ================= -->
+      <!-- Visual: Clean dark background with subtle lighting. -->
+      <!-- Title: “Library Management System” -->
+      <!-- Subtitle: “Explore the project on GitHub” -->
+      <!-- URL: https://github.com/Bhavesh1424/Library-Management -->
+      <!-- End with smooth fade-out. -->
+      <div data-hf-id="hf-ym2m" id="clip-scene-5" class="scene-clip clip" data-start="23.0" data-duration="4.0" data-track-index="5">
+        <div data-hf-id="hf-z50w" id="scene-5-content" class="scene-content">
+          <div data-hf-id="hf-v0w9" style="text-align: center; max-width: 1100px">
+            <!-- Icon Crest -->
+            <div data-hf-id="hf-bi4i" id="s5-crest" style="
+                width: 96px;
+                height: 96px;
+                margin: 0 auto 32px auto;
+                border-radius: 28px;
+                background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
+                border: 2px solid rgba(56, 189, 248, 0.5);
+                box-shadow: 0 12px 40px rgba(14, 165, 233, 0.35);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 48px;
+              ">
+              🏛️
+            </div>
+
+            <!-- Title -->
+            <h1 data-hf-id="hf-k6i6" id="s5-title" class="hero-title" style="font-size: 72px; margin-bottom: 20px">
+              Library Management System
+            </h1>
+
+            <!-- Subtitle -->
+            <p data-hf-id="hf-mm0h" id="s5-subtitle" style="
+                font-size: 28px;
+                color: #94a3b8;
+                font-weight: 500;
+                margin-bottom: 40px;
+              ">
+              Explore the project on GitHub
+            </p>
+
+            <!-- URL Card -->
+            <div data-hf-id="hf-m1nh" id="s5-url-card" class="glass-panel" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 18px;
+                padding: 18px 40px;
+                border-radius: 9999px;
+                border: 1.5px solid rgba(56, 189, 248, 0.4);
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 189, 248, 0.15);
+              ">
+              <span data-hf-id="hf-woyr" style="font-size: 28px">🔗</span>
+              <span data-hf-id="hf-fdr5" class="mono-text" style="
+                  font-size: 22px;
+                  font-weight: 700;
+                  color: #38bdf8;
+                  letter-spacing: -0.01em;
+                ">
+                https://github.com/Bhavesh1424/Library-Management
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Black Fade Overlay for Smooth Closing -->
+      <div data-hf-id="hf-3ddw" id="fade-overlay"></div>
+    </div>
+
+    <!-- GSAP Seek-Safe Deterministic Animation Script -->
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // ================= SCENE 1 (0.0s – 4.0s) =================
+      // The Hook: “A smarter way to manage libraries.”
+      // Smooth zoom transition into Scene 2 with cinematic sound effect at ~3.4s
+      tl.fromTo(
+        "#s1-tag",
+        { opacity: 0, y: -20, scale: 0.92 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power2.out" },
+        0.3
+      );
+      tl.fromTo(
+        "#s1-headline",
+        { opacity: 0, y: 35, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" },
+        0.6
+      );
+      tl.fromTo(
+        "#s1-subtext",
+        { opacity: 0, y: 25 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
+        1.1
+      );
+      tl.fromTo(
+        "#s1-pills .tech-pill",
+        { opacity: 0, y: 20, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.12, ease: "back.out(1.4)" },
+        1.5
+      );
+
+      // Camera Push & Transition Zoom
+      tl.to(
+        "#s1-zoom-wrapper",
+        { scale: 1.12, opacity: 0, duration: 0.7, ease: "power2.in" },
+        3.3
+      );
+
+      // ================= SCENE 2 (4.0s – 9.0s) =================
+      // Product Reveal: “Meet your Library Management System.”
+      // Slow, smooth camera push-in on genuine application screens
+      tl.fromTo(
+        "#s2-header",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" },
+        4.1
+      );
+      tl.fromTo(
+        "#s2-browser",
+        { opacity: 0, scale: 0.92, y: 40 },
+        { opacity: 1, scale: 0.97, y: 0, duration: 0.6, ease: "power3.out" },
+        4.3
+      );
+
+      // Smooth slow camera push-in across reveal scene
+      tl.to(
+        "#s2-browser",
+        { scale: 1.03, duration: 3.6, ease: "sine.inOut" },
+        4.9
+      );
+
+      // Transition out
+      tl.to(
+        "#scene-2-content",
+        { opacity: 0, scale: 0.96, duration: 0.5, ease: "power2.in" },
+        8.5
+      );
+
+      // ================= SCENE 3 (9.0s – 16.0s) =================
+      // Feature Showcase: Quick synchronized cuts
+      // “Organize.” (9.0s - 11.3s)
+      tl.fromTo(
+        "#s3-feature-organize",
+        { opacity: 0, scale: 0.94 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" },
+        9.0
+      );
+      tl.to(
+        "#s3-feature-organize",
+        { scale: 1.03, duration: 1.6, ease: "sine.inOut" },
+        9.4
+      );
+      tl.to(
+        "#s3-feature-organize",
+        { opacity: 0, scale: 0.96, duration: 0.25, ease: "power2.in" },
+        11.05
+      );
+
+      // “Track.” (11.3s - 13.6s)
+      tl.fromTo(
+        "#s3-feature-track",
+        { opacity: 0, scale: 0.94 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" },
+        11.3
+      );
+      tl.to(
+        "#s3-feature-track",
+        { scale: 1.03, duration: 1.58, ease: "sine.inOut" },
+        11.72
+      );
+      tl.to(
+        "#s3-feature-track",
+        { opacity: 0, scale: 0.96, duration: 0.25, ease: "power2.in" },
+        13.35
+      );
+
+      // “Simplify.” (13.6s - 16.0s)
+      tl.fromTo(
+        "#s3-feature-simplify",
+        { opacity: 0, scale: 0.94 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" },
+        13.6
+      );
+      tl.to(
+        "#s3-feature-simplify",
+        { scale: 1.03, duration: 1.6, ease: "sine.inOut" },
+        14.0
+      );
+      tl.to(
+        "#s3-feature-simplify",
+        { opacity: 0, scale: 0.96, duration: 0.35, ease: "power2.in" },
+        15.65
+      );
+
+      // ================= SCENE 4 (16.0s – 23.0s) =================
+      // Behind the Build: “Built with code. Designed for efficiency.”
+      // Genuine source code & architecture presentation
+      tl.fromTo(
+        "#s4-header",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" },
+        16.1
+      );
+      tl.fromTo(
+        "#s4-split",
+        { opacity: 0, y: 40, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" },
+        16.4
+      );
+      tl.to(
+        "#s4-split",
+        { scale: 1.02, duration: 5.0, ease: "sine.inOut" },
+        17.2
+      );
+      tl.to(
+        "#scene-4-content",
+        { opacity: 0, scale: 0.96, duration: 0.5, ease: "power2.in" },
+        22.4
+      );
+
+      // ================= SCENE 5 (23.0s – 27.0s) =================
+      // Closing: Title, Subtitle, GitHub URL, and Smooth Fade-out
+      tl.fromTo(
+        "#s5-crest",
+        { opacity: 0, scale: 0.6, rotation: -12 },
+        { opacity: 1, scale: 1, rotation: 0, duration: 0.6, ease: "back.out(1.6)" },
+        23.1
+      );
+      tl.fromTo(
+        "#s5-title",
+        { opacity: 0, y: 25 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        23.3
+      );
+      tl.fromTo(
+        "#s5-subtitle",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        23.6
+      );
+      tl.fromTo(
+        "#s5-url-card",
+        { opacity: 0, y: 25, scale: 0.92 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.4)" },
+        23.9
+      );
+
+      // Final Smooth Fade-Out to Black (26.2s to 27.0s)
+      tl.fromTo(
+        "#fade-overlay",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.8, ease: "power2.inOut" },
+        26.2
+      );
+
+      // Register timelines for Hyperframes
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      window.__HYPERFRAMES_TIMELINE__ = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
